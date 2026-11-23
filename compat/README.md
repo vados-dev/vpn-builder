@@ -63,23 +63,23 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 
 | Команда	| apt	| dnf / yum |
 |---|---|---|
-| pm update	apt-get update	dnf makecache --refresh
-| pm upgrade	apt-get upgrade -y	dnf upgrade -y
-| pm full-upgrade	apt-get full-upgrade -y	dnf upgrade -y
-| pm install <pkg…>	apt-get install -y	dnf install -y
-| pm reinstall <pkg…>	apt-get install --reinstall	dnf reinstall
-| pm remove <pkg…>	apt-get remove -y	dnf remove -y
-| pm purge <pkg…>	apt-get purge -y	dnf remove -y*
-| pm autoremove	apt-get autoremove -y	dnf autoremove -y
-| pm clean	apt-get clean + autoclean	dnf clean all
-| pm search <query>	apt-cache search	dnf search
-| pm show <pkg>	apt-cache show	dnf info
-| pm info <pkg>	псевдоним show	псевдоним show
-| pm list installed	dpkg -l	dnf list installed
-| pm list upgradable	apt list --upgradable	dnf check-update
-| pm list all	apt-cache pkgnames	dnf list available
-| pm whatprovides <file>	dpkg -S	dnf provides
-| pm version <pkg>	dpkg-query -W	rpm -q
-| pm hold <pkg>	apt-mark hold	dnf versionlock add
-| pm unhold <pkg>	apt-mark unhold	dnf versionlock delete
+| `pm update` |	`apt-get update` | `dnf makecache --refresh` |
+| `pm upgrade` |	`apt-get upgrade -y` | `dnf upgrade -y` |
+| `pm full-upgrade` |	`apt-get full-upgrade -y` | `dnf upgrade -y` |
+| `pm install <pkg…>` |	`apt-get install -y` | `dnf install -y` |
+| `pm reinstall <pkg…>` |	`apt-get install --reinstall` | `dnf reinstall` |
+| `pm remove <pkg…>` |	`apt-get remove -y` | `dnf remove -y` |
+| `pm purge <pkg…>` |	`apt-get purge -y` | `dnf remove -y` |
+| `pm autoremove` |	`apt-get autoremove -y` | `dnf autoremove -y` |
+| `pm clean` |	`apt-get clean + autoclean` | `dnf clean all` |
+| `pm search <query>` |	`apt-cache search` | `dnf search` |
+| `pm show <pkg>` |	`apt-cache show` | `dnf info` |
+| `pm info <pkg>` |	псевдоним `show` |	псевдоним `show` |
+| `pm list installed` |	`dpkg -l` | `dnf list installed` |
+| `pm list upgradable` |	`apt list --upgradable` | `dnf check-update`|
+| `pm list all` |	`apt-cache pkgnames` | `dnf list available` |
+| `pm whatprovides <file>` |	`dpkg -S` | `dnf provides` |
+| `pm version <pkg>` |	`dpkg-query -W	rpm -q` | |
+| `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add
+| `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
 >⚠️[!WARNING]  В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
