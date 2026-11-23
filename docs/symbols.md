@@ -1,4 +1,7 @@
 # :boom: Таблица символов :boom: 
+
+<div align="center">
+
 |символ|tag|
 |---|---|
 |:warning:|`:warning:`|
@@ -27,12 +30,14 @@
 |:arrow_forward:|`:arrow_forward:`|
 |:arrow_up_down:|`:arrow_up_down:`|
 
+</div>
+
 ---
 
 <div align="center">
 
 **сделано ❤️ для себя**
 
-[![Link](https://img.shields.io/badge/%E2%AC%86-Вверх-151b23?style=for-the-badge&logoColor=white&labelColor=0000FF)](#модуль-ядра-amneziawg-vds)
+[![Link](https://img.shields.io/badge/⬆️-Вверх-151b23?style=for-the-badge&logoColor=white&labelColor=0000FF)](#модуль-ядра-amneziawg-vds)
 
 </div>
