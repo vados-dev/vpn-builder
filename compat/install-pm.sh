@@ -52,6 +52,15 @@ PARENT_DIR="$(dirname "${SELF_DIR}")"
 dbg=0
 ME="${PROGRAM}"
 
+case "$ME" in
+  install-pm.sh|install-pm)
+    case " ${ARGS[*]-} " in
+      *" -i "*|*" --install "*) : ;;   # ключ уже задан — не дублируем
+      *) set -- -i "$@" ;;
+    esac
+    ;;
+esac
+
 if [ -t 0 ]; then
   cmd()  { printf '[\033[1;33m✨\033[0m]#: `\033[1m%s\033[0m`\n' "$*"; }
   color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; }; }
