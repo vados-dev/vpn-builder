@@ -24,14 +24,19 @@ pm — это shell-скрипт, который даёт один и тот ж�
 Скрипт не притворяется apt: сторонние установщики, которые детектируют дистрибутив по наличию apt в PATH, ничего не путают. Поэтому бинарник называется pm, а не apt.
 Локальные пакеты разруливаются по расширению: ./file.deb ставится только через apt, ./file.rpm — только через dnf. Чужой формат скрипт откажется ставить с понятным сообщением, а не сломает систему.
 
-⚠️Что тут важно знать
-  >⚠️ Синтаксис apt — исполнение честное. Скрипт не эмулирует вывод, а вызывает настоящий бэкенд, поэтому возврат кодов и текст оригинальный. Отличия, которые осознанно встроены: **
+### :warning:**Что тут важно знать**
 
-  >⚠️ pm update на dnf — это makecache, аналог apt update.
-  pm list upgradable на dnf — check-update (он же возвращает код 100, когда есть обновления, — как у apt, кстати).
-  pm purge на dnf неотличим от remove (концепция conffiles там нет) — так и задумано.
-  Локальные пакеты: pm install ./x.deb работает только на apt, ./x.rpm — только на dnf. Чужой формат скрипт откажется ставить с ясным сообщением, а не станет конвертировать.
-  whatprovides/version и hold/unhold — это то, что в apt-мире обычно руками через dpkg/apt-mark, а в dnf — provides/versionlock. Тоже сведено в одно место.
+:exclamation:**Синтаксис apt — исполнение честное.
+Скрипт не эмулирует вывод, а вызывает настоящий бэкенд, поэтому возврат кодов и текст оригинальный.**
+
+> Отличия, которые осознанно встроены:
+>  1. pm update на dnf — это makecache, аналог apt update.
+>  2. pm list upgradable на dnf — check-update (он же возвращает код 100, когда есть обновления, — как у apt, кстати).
+>  3. pm purge на dnf неотличим от remove (концепция conffiles там нет) — так и задумано.
+
+> Локальные пакеты:
+>  1. pm install ./x.deb работает только на apt, ./x.rpm — только на dnf. Чужой формат скрипт откажется ставить с ясным сообщением, а не станет конвертировать.
+>  2. whatprovides/version и hold/unhold — это то, что в apt-мире обычно руками через dpkg/apt-mark, а в dnf — provides/versionlock. Тоже сведено в одно место.
 
 ## 🚀 Установка и Запуск pm
 Быстрая команда (установка в /usr/local/bin):
@@ -83,3 +88,17 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 | `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add` |
 | `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
 >⚠️[!WARNING]  В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
+
+
+
+|символ|tag|
+|---|---|
+|🪂| - |
+|:boom:|`:boom:`|
+|:dizzy:|`:dizzy:`|
+|:white_check_mark:|`:white_check_mark:`|
+|:x:|`:x:`|
+|:warning:|`:warning:`|
+|:zap:|`:zap:`|
+|:exclamation:|`:exclamation:`|
+|:question:|`:question:`|
