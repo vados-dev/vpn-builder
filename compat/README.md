@@ -79,7 +79,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 | `pm list upgradable` |	`apt list --upgradable` | `dnf check-update`|
 | `pm list all` |	`apt-cache pkgnames` | `dnf list available` |
 | `pm whatprovides <file>` |	`dpkg -S` | `dnf provides` |
-| `pm version <pkg>` |	`dpkg-query -W	rpm -q` |
+| `pm version <pkg>` |	`dpkg-query -W` |	`rpm -q` |
 | `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add` |
 | `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
 >⚠️[!WARNING]  В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
