@@ -2,13 +2,16 @@
 
 <div align="center">
 
-![AmneziaWG](https://img.shields.io/badge/AmneziaWG-3.1-7C3AED?style=for-the-badge&logo=wireguard)
-[![Release](https://img.shields.io/github/v/release/vados-dev/amneziawg-linux-kernel-module-vds?style=for-the-badge&logo=github)](https://github.com/vados-dev/amneziawg-linux-kernel-module-vds/releases)
-![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen?style=flat-square&labelColor=grey)](https://opensource.org/licenses/MIT)
+[![Platform](https://img.shields.io/badge/CentOS%209%2B-8A2BE2?style=flat-square&logo=centos&logoColor=white&labelColor=black)](https://www.centos.org/)
+[![Platform](https://img.shields.io/badge/Ubuntu%2024%20%2F%20Debian%2012%2B-E95420?style=flat-square&logo=ubuntu&logoColor=white&labelColor=black)](https://ubuntu.com/)
+[![AmneziaWG](https://img.shields.io/badge/AmneziaWG%203.1-red?style=flat-square&logo=wireguard&logoColor=red&labelColor=black)](#)
+[![Release](https://img.shields.io/github/v/release/vados-dev/amneziawg-linux-kernel-module-vds?style=flat-square&logo=github)](https://github.com/vados-dev/amneziawg-linux-kernel-module-vds/releases)
+
 
 ** Разработка установщика для быстрого развёртывания VPN серверов **
 
-[Описание](#описание) • [Features](#-features) • [Proxmox LXC](#-proxmox-lxc) • [MikroTik CHR](#-mikrotik-chr) • [Screenshots](#-screenshots) • [Troubleshooting](#-troubleshooting)
+[Описание](#описание) • [Features](#-features) • [Installation](#-installation) • [Screenshots](#-screenshots) • [Troubleshooting](#-troubleshooting)
 
 </div>
 
