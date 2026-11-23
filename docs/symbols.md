@@ -26,3 +26,13 @@
 |:arrow_backward:|`:arrow_backward:`|
 |:arrow_forward:|`:arrow_forward:`|
 |:arrow_up_down:|`:arrow_up_down:`|
+
+---
+
+<div align="center">
+
+**сделано ❤️ для себя**
+
+[![Link](https://img.shields.io/badge/%E2%AC%86-Вверх-151b23?style=for-the-badge&logoColor=white&labelColor=0000FF)](#модуль-ядра-amneziawg-vds)
+
+</div>
