@@ -87,18 +87,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 | `pm version <pkg>` |	`dpkg-query -W` |	`rpm -q` |
 | `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add` |
 | `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
->⚠️[!WARNING]  В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
+>:warning: В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
 
 
-
-|символ|tag|
-|---|---|
-|🪂| - |
-|:boom:|`:boom:`|
-|:dizzy:|`:dizzy:`|
-|:white_check_mark:|`:white_check_mark:`|
-|:x:|`:x:`|
-|:warning:|`:warning:`|
-|:zap:|`:zap:`|
-|:exclamation:|`:exclamation:`|
-|:question:|`:question:`|
