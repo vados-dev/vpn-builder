@@ -25,7 +25,7 @@
 
 <div align="center">
 
-**сделано ❤️ для себя**
+**сделано :sparkling_heart: для себя**
 
 [![Link](https://img.shields.io/badge/%E2%AC%86-Вверх-151b23?style=for-the-badge&logoColor=white&labelColor=0000FF)](#заготовки-badges)
 
