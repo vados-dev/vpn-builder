@@ -1,6 +1,92 @@
 ## Вопрос
 
+### Уточнение
+А если массива нет, фалбак "true"|"false"
 
+> Договорились: вилка опциональна — не дали вилку, судья работает по вилке по умолчанию. Только дефолт сделаю содержательным: голые слова «true/false» в реальном выводе встречаются редко, а вот success|ok|done — это то, что реально печатает firewall-cmd и systemctl; ложь — error|fail|denied|failed. Ключ answer в дефолте пуст — «не да и не нет» без явной вилки трактуем честно: вывод есть, вердикта нет → answer_box при dbg.
+
+Блок комментариев:
+```
+# ![Агенту]: ФАЛБАК вилки. Если вилка не передана (вызов начинается с "--"
+#   или пуста), overlay_cmd берёт дефолт: true="success|ok|done",
+#   false="false|error|fail|denied", answer="".
+#   Дефолт — не абстракция: это реально печатаемые токены firewall-cmd ("success")
+#   и systemctl ("ok"). Голые "true/false" оставили бы судью слепым.
+#   Контракт: ровно два способа вызвать — С вилкой (3 паттерна + --) или БЕЗ
+#   (сразу --). Частичная вилка — ошибка вызова, не молчаливый дефолт.
+#   input_cmd зеркалит: вилку в dbg-баннер не печатаем, только команду.
+
+```
+
+Ветка tty:
+```
+    overlay_cmd() { local ok_re fail_re ans_re; if [ "$1" = "--" ] || [ -z "$1" ]; then ok_re="success|ok|done"; fail_re="false|error|fail|denied"; ans_re=""; shift; else ok_re="$1"; fail_re="$2"; ans_re="$3"; shift 3; fi; local out rc; out="$("$@")"; rc=$?; if [ "$rc" -eq 0 ] && [ -n "$ok_re" ] && [[ "$out" =~ ($ok_re) ]]; then ASK=0; printf '%s\n' "$out"; elif [ "$rc" -eq 0 ] && [ -n "$ans_re" ] && [[ "$out" =~ ($ans_re) ]]; then ASK=1; printf '%s\n' "$out"; else ASK=0; printf '%s\n' "$out" >&2; [ "$dbg" -eq 1 ] && answer_box "Неожиданный вывод: ${out:-пусто}"; fi; return "$rc"; }
+    input_cmd()   { if [ "$1" = "--" ] || [ -z "$1" ]; then [ "$dbg" -eq 1 ] && cmd "${@:2}"; else [ "$dbg" -eq 1 ] && cmd "${@:5}"; fi; overlay_cmd "$@"; }
+```
+После else — одинаковые сигнатуры, без краски:
+
+```
+    overlay_cmd() { local ok_re fail_re ans_re; if [ "$1" = "--" ] || [ -z "$1" ]; then ok_re="success|ok|done"; fail_re="false|error|fail|denied"; ans_re=""; shift; else ok_re="$1"; fail_re="$2"; ans_re="$3"; shift 3; fi; local out rc; out="$("$@")"; rc=$?; if [ "$rc" -eq 0 ] && [ -n "$ok_re" ] && [[ "$out" =~ ($ok_re) ]]; then ASK=0; printf '%s\n' "$out"; elif [ "$rc" -eq 0 ] && [ -n "$ans_re" ] && [[ "$out" =~ ($ans_re) ]]; then ASK=1; printf '%s\n' "$out"; else ASK=0; printf '%s\n' "$out" >&2; [ "$dbg" -eq 1 ] && answer_box "Неожиданный вывод: ${out:-пусто}"; fi; return "$rc"; }
+    input_cmd()   { if [ "$1" = "--" ] || [ -z "$1" ]; then [ "$dbg" -eq 1 ] && cmd "${@:2}"; else [ "$dbg" -eq 1 ] && cmd "${@:5}"; fi; overlay_cmd "$@"; }
+```
+Оба стиля вызова теперь живут рядом — с вилкой и без:
+```
+# БЕЗ вилки — фалбак:
+input_cmd -- "$fw_exec" --reload
+input_cmd -- $chk_cmd $chk_args
+
+# С вилкой — где мы знаем, что ждём:
+input_cmd "success" "error|fail|NOT_ALLOWED" "" -- "$fw_exec" --permanent "$@"
+```
+:warning:**Три момента, чтобы не споткнуться:**
+
+> - [ -z "$1" ] в проверке — защита от голого вызова overlay_cmd cmd args     без вилки и без --: он тоже уйдёт в фалбак, а не разорвёт shift 3. Но в коде писать так не советую — всегда --, чтобы намерение читалось. 
+> - Частичная вилка (input_cmd "success" -- ...) уйдёт в ветку «с вилкой» и сдвинет -- на место fail_re. Ловится глазами в dbg-баннере; строгую валидацию (аргументы не начинаются с - до --) можно добавить, когда вилок станет много — сейчас не плоди сущности.
+> - Дефолт в переменных скрипта, а не в функции, если захочешь крутить фалбак глобально: DEF_OK_RE="success|ok|done", DEF_FAIL_RE="false|error|fail|denied" — и в функции подставлять ${DEF_OK_RE}. Одна точка правки на будущее, когда начнётся база ответов.
+
+> :exclamation:**Проверь ./fwreload (должен дать success без вилки, по фалбаку) и ./fwperm --add-service=http (с вилкой). Оба сядут — всё, ядро обкатано, выкладываю fwcmd_install.**
+
+### Уточнение
+Так, нет. Умолчания простые как для confirm true|success|0 и false| Error|1, если команда возвращает вместо success что-то другое, не из набора по умолчанию для отказов, при dbg=0 и tg_notify=0, принимаем за отказ и тупо возвращаем false. Главное - это ключи успеха /отказа для окея. А дальше уже, если мы объявляем массивы ключевых слов, окея не должно быть при выходе из функции, возвращает сам overlay и мы это ожидаем при вызове. И не бойся declare, нам этот скрипт для разовых команд, да и unset никто не отменял
+
+> **Принято: дефолт — голые ключи, сюрприз по умолчанию — отказ, вилка на declare — вердикт возвращает сам overlay, ok при вилке не вызывается. Держите.**
+
+Блок комментариев:
+```
+# ![Агенту]: Вилка — declare -A с ключами true/false/answer, объявляется НА ВЫЗОВЕ:
+#   declare -A RESP=([true]="success" [false]="error|fail" [answer]="")
+#   input_cmd RESP -- "$fw_exec" --reload ; unset RESP   (unset — никто не отменял)
+#   В режиме вилки overlay САМ ok() НЕ вызывает: вердикт — его код возврата
+#   (0=true, 1=false, 2=answer), реальный rc команды — в глобале RC, вывод — в OUT.
+#   Мы это ожидаем при вызове: case $? in 0) ... 1) ... 2) answer_box "$OUT" ;;
+#   БЕЗ вилки ("--") — дефолт: true="true|success|^0$", false="false|Error|^1$".
+#   Несовпавший вывод при dbg=0 и tg_notify=0 = ОТКАЗ: ok 1, return 1. Тупо и честно.
+#   При dbg=1 — answer_box с полным выводом (смотрим, что команда хотела сказать);
+#   при tg_notify=1 — уход в tg_notify.
+#   Цифры 0/1 в дефолтах — с якорями ^0$/^1$: голая "1" совпала бы с ЛЮБЫМ выводом,
+#   где есть символ 1 ("port 8081", "IPv4") — ложный вердикт. Якорь = точное слово.
+#   overlay_cmd, input_cmd, run_cmd, tg_notify вынесены ПОСЛЕ if/else — они
+#   не зависят от цвета, красят за ними ok/answer_box/log.
+```
+
+В статические vars добавить:
+```
+    DEF_OK_RE="true|success|^0$"
+    DEF_FAIL_RE="false|Error|^1$"
+    TG_NOTIFY=0 # слать неожиданные ответы в телеграм вместо молчаливого отказа
+    OUT=""      # вывод последней команды из overlay_cmd
+    RC=0        # реальный код последней команды из overlay_cmd
+```
+
+Ветка tty — правится только ok (теперь понимает оба вызова: с вердиктом от overlay и с ловлей $? после команды):
+```
+    ok()        { local rc="$?"; local m; case "$1" in 0|1) rc="$1"; m="$2";; *) m="$1";; esac; [ "$rc" -eq 0 ] && printf '\033[1;32m √ %s\033[0m\n' "${m:-}" || printf '\033[1;31m ✘ %s\033[0m\n' "${m:-}"; return "$rc"; }
+```
+После else — то же, без краски:
+
+```o
+    k()        { local rc="$?"; local m; case "$1" in 0|1) rc="$1"; m="$2";; *) m="$1";; esac; [ "$rc" -eq 0 ] && printf ' √ %s\n' "${m:-}" || printf ' ✘ %s\n' "${m:-}"; return "$rc"; }
+```
 
 Общий блок ПОСЛЕ if/else (одна копия на оба мира — краску им дают ok/answer_box из ветки):
 ```
