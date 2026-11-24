@@ -110,7 +110,7 @@ if [ -t 0 ]; then
     err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; }
     die()  { printf '\033[1;31m ❌ CRITICAL:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; exit 1; }
     prompt_yn() { local def="$1"; [ "$def" == "y" ] && printf '\033[1m%s [Y/n]:\033[0m ' "$def" || printf '\033[1m%s [y/N]:\033[0m ' "$def"; }
-    ok() { [ "$1" != "1" ] && printf '\033[1;32m √ %s\033[0m\n' "$*" || { printf '\033[1;31m ✘ %s\033[0m\n' "$*"; }; }
+    ok() { [ "$1" != "1" ] && printf '\033[1;32m √ %s\033[0m\n' "$2" || { printf '\033[1;31m ✘ %s\033[0m\n' "$2"; }; }
 else
     cmd()  { printf '[*]#: `%s`\n' "$*"; }
     color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '%s\n' "$out" || { printf '%s\n' "$out"; }; }
@@ -120,35 +120,34 @@ else
     err()  { printf '[ERROR] [%s] - %s!\n' "$me_name" "$*" >&2; }
     die()  { printf '[CRITICAL] [%s] - %s!\n' "$me_name" "$*" >&2; exit 1; }
     prompt_yn() { [ "$2" == "y" ] && printf '%s [Y/n]: ' "$1" || printf '%s [y/N]: ' "$1"; }
-    ok() { [ "$1" = "0" ] && printf ' √ %s\n' "$*" || { printf ' ✘ %s\n' "$*"; }; }
+    ok() { [ "$1" = "0" ] && printf ' √ %s\n' "$2" || { printf ' ✘ %s\n' "$2"; }; }
 fi
 
 confirm() {
     local assume_yes="${1:-1}" prompt="${2:-Уверены?}" default="${3:-Y}"
-    [ -t 0 ] && [ "$assume_yes" = "1" ] || return 1 #die "Нет интерактивного терминала — используйте -y"
+    [ "$assume_yes" = "1" ] 
+    [ -t 0 ] || die "Нет интерактивного терминала — используйте -y"
     read -r -p "$(prompt_yn "$prompt" "${default,,}")" a; [ "$a" = "y" ] && ok 0 "Подтверждено пользователем" || { ok 1 "Отменено пользователем"; exit 0; }
+}
+
+fwcmd_install() {
+    [ "$1" = "-h" ] || [ "$1" = "--help" ] && { install_usage; exit 0; }
+    [[ -z "$1" ]] || assume_yes="$1"; [[ -z "$2" ]] || BIN_DIR="$2"
+    confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y" || { log "Установка отменена"; exit 0; }
+    [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
+    install -m 755 ${me_name} "${BIN_DIR}/${PROGRAM}" || die "Ошибка установки ${PROGRAM}"
+    log "установлена в ${BIN_DIR}/${PROGRAM}"
+    log "создаю симлинки..."
+    cd "${BIN_DIR}" || die "Ошибка перехода в ${BIN_DIR}"
+    for link in "${SYMLINKS[@]}"; do
+        ln -sf "${PROGRAM}" "${link}" || die "Ошибка создания симлинка ${link}"
+        log "- ${link} -> ${PROGRAM}"
+    done
+    ok 1 "Установка завершена."
 }
 
 dbg_cmd() { cmd "$*"; color_cmd "$*"; }
 run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*"; }
-
-fwcmd_install() {
-    [ "$1" = "-h" ] || [ "$1" = "--help" ] && { install_usage; exit 0; }
-    [[ -z "$1" ]] || assume_yes="$1"
-    [[ -z "$2" ]] || BIN_DIR="$2"
-    confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y"
-    [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
-    install -m 755 ${me_name} "${BIN_DIR}/${PROGRAM}" || die "Ошибка установки ${PROGRAM}"
-    log "установлена в ${BIN_DIR}/${PROGRAM}"
-    log "созданы симлинки:"
-    cd "${BIN_DIR}" || die "Ошибка перехода в ${BIN_DIR}"
-    for link in "${SYMLINKS[@]}"; do
-        ln -sf "${PROGRAM}" "${link}" || die "Ошибка создания симлинка ${link}"
-        log "  ${link} -> ${PROGRAM}"
-    done
-
-    log "Установка завершена"
-}
 
 usage() { sed -n '25,43p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 install_usage() { sed -n '2,25p' "${SELF}" | sed 's/^# \{0,1\}//'; }
