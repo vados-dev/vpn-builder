@@ -51,7 +51,7 @@
 #     -st|status.........Показать статус службы.
 #     -cc|chk_conf.......Проверить конфиги без применения (оффлайн).
 #     -j |journ..........Показать журнал службы.
-#     -h |--help.........Эта справка
+#     -h |--help.........Эта справка.
 #
 
 set -o pipefail
@@ -121,7 +121,7 @@ usage() { sed -n '2,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 ctl_usage() { sed -n '38,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 
 fwctl_cmd() {
-    [ $# -gt 0 ] || { err "Пустые аргументы!"; ctl_usage; exit 2; }
+    [ $# -gt 0 ] || { err "Пустые аргументы"; ctl_usage; exit 2; }
     case $1 in
         -e|enable)          run_cmd $fwctl_exec enable $fw_service ;;
         -d|disable)         run_cmd $fwctl_exec disable $fw_service ;;
