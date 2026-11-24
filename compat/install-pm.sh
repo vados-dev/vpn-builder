@@ -67,12 +67,6 @@ RC=0        # реальный код последней команды из ove
 
 dbg=1
 
-#    [ "${me_name}" != "install-pmmd.sh" ] && ([ "$1" = "-h" ] || [ "$1" = "--help" ]) && { usage; exit 0; }
-   case "${me_name}" in
-       install-pm.sh|install-pm)  pm_install "$@" ;;
-       *) usage; exit 1; ;;
-   esac
-
 if [ -t 0 ]; then
     cmd()        { printf '[\033[1;33m✨\033[0m]#: ' >&2; printf '%q ' "$@" >&2; printf '\033[0m\n' >&2; }
     answer_box() { printf '\033[1;33m ⚡ %s\033[0m\n' "$*"; }
@@ -143,6 +137,13 @@ pm_install() {
 }
 
 usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+
+#    [ "${me_name}" != "install-pmmd.sh" ] && ([ "$1" = "-h" ] || [ "$1" = "--help" ]) && { usage; exit 0; }
+case "${me_name}" in
+    install-pm.sh|install-pm)  pm_install "$@" ;;
+    *) usage; ;;
+esac
+
 install_usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 
 pkg_is_local() { case "$1" in ./*|/*) return 0 ;; *) return 1 ;; esac; }
@@ -214,7 +215,7 @@ case "$cmd" in
         case "$PKG" in apt) maybe_sudo apt-mark unhold "$@" ;; *) maybe_sudo "$PKG" versionlock delete "$@" ;; esac ;;
     --version)
         case "$PKG" in apt) run_cmd apt-get --version; run_cmd apt --version ;; *) run_cmd "$PKG" --version; run_cmd rpm --version ;; esac ;;
-    -i|--install) pm_install "$@" ;;
+#    -i|--install) pm_install "$@" ;;
     -h|--help|help|"") usage ;;
     *) { err "Неизвестный аргумент '$1'"; ctl_usage; exit 2; } ;;
 esac
