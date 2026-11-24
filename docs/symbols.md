@@ -5,8 +5,6 @@
 <a href="https://github.com/vados-dev/emoji-cheat-sheet"><img src="https://img.shields.io/badge/GitHub_vados--dev_с_emoji-151b23?style=plastic&logoColor=white&labelColor=0000FF&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)" alt="GitHub vados-dev с emoji" /></a>
 </p>
 
-
-
 <div align="center">
 
 |символ|tag|
