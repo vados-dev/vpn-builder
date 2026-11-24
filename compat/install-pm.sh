@@ -67,10 +67,11 @@ RC=0        # реальный код последней команды из ove
 
 dbg=1
 
-case "$me_name" in
-  install-pm.sh|install-pm)
-    *) set -- -i "$@" ;;
-esac
+#    [ "${me_name}" != "install-pmmd.sh" ] && ([ "$1" = "-h" ] || [ "$1" = "--help" ]) && { usage; exit 0; }
+   case "${me_name}" in
+       install-pm.sh|install-pm)   set -- -i "$@" ;;
+       *) set -- -i "$@" ;;
+   esac
 
 if [ -t 0 ]; then
     cmd()        { printf '[\033[1;33m✨\033[0m]#: ' >&2; printf '%q ' "$@" >&2; printf '\033[0m\n' >&2; }
