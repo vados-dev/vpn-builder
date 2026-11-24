@@ -13,7 +13,13 @@
 ## 📋 Описание `fwcmd`
 `fwcmd` -- этопомощник с командами firewalld.
 
-Пути по умолчанию:
+### 📂 Пути по умолчанию:
+```text
+/usr/local/bin/fwcmd
+              /@fwreload
+              /@fwperm
+
+```
 
 - Сам скрипт..."/usr/local/bin/fwcmd"
 - Симлинки....."/usr/local/bin/fwreload"
