@@ -178,7 +178,7 @@ fw_cmd() {
         fwperm)             run_cmd $fw_exec --permanent "$@" ;;
         fwchk)              run_cmd $chk_cmd $chk_args ;;
         fwctl)              fwctl_cmd "$@" ;;
-        install-fwcmd.sh)   fwcmd_install "$1" ;;
+        install-fwcmd.sh)   fwcmd_install "$@" ;;
         *)                  run_cmd $fw_exec "$@" ;;
     esac
 }
