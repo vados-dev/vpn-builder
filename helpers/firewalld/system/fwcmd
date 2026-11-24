@@ -172,12 +172,12 @@ fwctl_cmd() {
 fw_cmd() {
     [ "${me_name}" != "install-fwcmd.sh" ] && ([ "$1" = "-h" ] || [ "$1" = "--help" ]) && { usage; exit 0; }
     case "${me_name}" in
-        fwreload)           run_cmd $fw_exec --reload ;;
-        fwperm)             run_cmd $fw_exec --permanent "$@" ;;
-        fwchk)              run_cmd $chk_cmd $chk_args ;;
-        fwctl)              fwctl_cmd "$@" ;;
-        install-fwcmd.sh)   fwcmd_install "$@" ;;
-        *)                  run_cmd $fw_exec "$@" ;;
+        fwreload)         input_cmd "$fw_exec" --reload ;;        # "success" → √
+        fwperm)           input_cmd "$fw_exec" --permanent "$@" ;;
+        fwchk)            input_cmd "$chk_cmd" "$chk_args" ;;
+        fwctl)            fwctl_cmd "$@" ;;
+        install-fwcmd.sh) fwcmd_install "$@" ;;
+        *)                run_cmd $fw_exec "$@" ;;
     esac
 }
 
