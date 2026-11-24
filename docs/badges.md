@@ -21,7 +21,17 @@
 
 </div>
 
----
+## :link:**Links:**
+
+<p align="center">
+<a href="https://gist.github.com/ricealexander/ae8b8cddc3939d6ba212f953701f53e6"><img src="https://img.shields.io/badge/Gist_с_полным_списком_GitHub_emoji-151b23?style=plastic&logoColor=white&labelColor=0000FF&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)" alt="Gist с полным списком GitHub emoji" /></a></p>
+<p align="left">
+<a href="https://github.com/vados-dev/emoji-cheat-sheet"><img src="https://img.shields.io/badge/%F0%9F%94%97-GitHub/vados--dev/emoji--cheat--sheet-rgb(0%200%200%20%2F%200%25)?style=for-the-badge&logoColor=white&labelColor=0000FF&labelColor=rgb(0%200%200%20%2F%200%25)" alt="GitHub vados-dev с emoji" /></a></p>
+
+</p>
+<p align="left">
+<a href="#заготовки-badges"><img src="https://img.shields.io/badge/%E2%AC%86-UP-151b23?style=flat-square&logoColor=white&labelColor=0000FF"></a><hr>
+</p>
 
 <div align="center">
 
