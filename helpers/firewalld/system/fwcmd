@@ -150,7 +150,15 @@ fwcmd_install() {
         if ln -sfn "$PROGRAM" "${BIN_DIR}/${link}" 2>/dev/null; then
             log "- ${link} -> ${PROGRAM}"
         elif [ -e "${BIN_DIR}/${link}" ] && [ ! -L "${BIN_DIR}/${link}" ]; then
-            rm -rf "${BIN_DIR:?}/${link}" && ln -sfn "$PROGRAM" "${BIN_DIR}/${link}" && log "- ${link} -> ${PROGRAM} (перезаписан)"; || { warn "Не смог перезаписать ${BIN_DIR}/${link}"; fail=$((fail+1)); }
+            if rm -rf "${BIN_DIR:?}/${link}" 2>/dev/null; then
+                if ln -sfn "$PROGRAM" "${BIN_DIR}/${link}"; then
+                    log "- ${link} -> ${PROGRAM} (перезаписан)"
+                else
+                    warn "Не смог создать симлинк ${BIN_DIR}/${link} после удаления"; fail=$((fail+1))
+                fi
+            else
+                warn "Не смог удалить ${BIN_DIR}/${link} (не файл/каталог? права?)"; fail=$((fail+1))
+            fi
         else
             warn "Не смог создать симлинк ${BIN_DIR}/${link} — проверьте права на ${BIN_DIR}"
             fail=$((fail+1))
