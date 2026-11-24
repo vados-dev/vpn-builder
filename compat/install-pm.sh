@@ -83,7 +83,6 @@ if [ -t 0 ]; then
     err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; }
     die()  { printf '\033[1;31m ❌ CRITICAL:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; exit 1; }
     prompt_yn() { local d="${2,,}"; [ "$d" = "y" ] && printf '\033[1m%s [Y/n]:\033[0m ' "$1" || printf '\033[1m%s [y/N]:\033[0m ' "$1"; }
-    ask()        { local a; if [ -t 0 ]; then read -r -p "$(prompt_yn "${1:-Продолжить?}" "${2:-Y}")" a < /dev/tty; case "${a,,}" in y|yes) return 0;; *) return 1;; esac; else tg_ask "$1"; fi; }
 else
     cmd()        { printf '[*]#: ' >&2; printf '%q ' "$@" >&2; printf '\n' >&2; }    
     answer_box() { printf ' ⚡ %s\n' "$*"; }
@@ -94,9 +93,9 @@ else
     err()  { printf '[ERROR] [%s] - %s!\n' "$me_name" "$*" >&2; }
     die()  { printf '[CRITICAL] [%s] - %s!\n' "$me_name" "$*" >&2; exit 1; }
     rompt_yn() { local d="${2,,}"; [ "$d" = "y" ] && printf '%s [Y/n]: ' "$1" || printf '%s [y/N]: ' "$1"; }
-    ask()        { local a; if [ -t 0 ]; then read -r -p "$(prompt_yn "${1:-Продолжить?}" "${2:-Y}")" a < /dev/tty; case "${a,,}" in y|yes) return 0;; *) return 1;; esac; else tg_ask "$1"; fi; }
 fi
 
+    ask() { local a d="${2:-Y}"; if [ -t 0 ]; then read -r -p "$(prompt_yn "${1:-Продолжить?}" "$d")" a < /dev/tty; a="${a:-$d}"; case "${a,,}" in y|yes) return 0;; *) return 1;; esac; else tg_ask "$1"; fi; }
 overlay_cmd() { local fork="$1"; shift; [ "$1" = "--" ] && shift; local out rc v msg; out="$("$@")"; rc=$?; RC=$rc; OUT="$out"; if [ "$fork" = "--" ]; then if [ "$rc" -eq 0 ] && [[ "$out" =~ (${DEF_OK_RE}) ]]; then v=0; msg="$out"; elif [ "$rc" -eq 0 ] && [ -z "$out" ]; then v=0; msg="пусто (уже выполнено)"; elif [[ "$out" =~ (${DEF_FAIL_RE}) ]] || [ "$rc" -ne 0 ]; then v=1; msg="$out"; else [ "$dbg" -eq 1 ] && answer_box "Неожиданный вывод: ${out:-пусто}"; [ "${TG_NOTIFY:-0}" = 1 ] && tg_notify "${me_name}: неожиданный вывод: ${out:-пусто}"; v=1; msg=""; fi; [ "$v" -eq 0 ]; ok "$msg"; return "$v"; fi; [[ "$(declare -p "$fork" 2>/dev/null)" == "declare -A"* ]] || die "overlay_cmd: '$fork' — не ассоциативный массив"; local tk="${fork}[true]" fk="${fork}[false]" ak="${fork}[answer]"; local ok_re="${!tk}" fail_re="${!fk}" ans_re="${!ak}"; if [ "$rc" -eq 0 ] && [ -n "$ok_re" ] && [[ "$out" =~ ($ok_re) ]]; then v=0; elif [ -n "$fail_re" ] && [[ "$out" =~ ($fail_re) ]]; then v=1; elif [ "$rc" -ne 0 ]; then v=1; else v=2; fi; return "$v"; }
 input_cmd()   { [ "$dbg" -eq 1 ] && cmd "${@:3}"; overlay_cmd "$@"; }
 run_cmd()     { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
