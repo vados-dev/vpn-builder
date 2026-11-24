@@ -118,9 +118,10 @@ fwcmd_install() {
 }
 
 usage() { sed -n '2,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
-ctl_usage() { sed -n '37,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+ctl_usage() { sed -n '38,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 
 fwctl_cmd() {
+    [ $# -gt 0 ] || { ctl_usage; die "Пустой аргумент! Используйте: fwctl -h"; }
     case $1 in
         -e|enable)          run_cmd $fwctl_exec enable $fw_service ;;
         -d|disable)         run_cmd $fwctl_exec disable $fw_service ;;
@@ -134,7 +135,7 @@ fwctl_cmd() {
         -cc|chk_conf)       run_cmd $chk_cmd $chk_args ;;
         -j|journ)           run_cmd journalctl -xeu $fw_service ;;
         -h|--help)          ctl_usage ;;
-        *) err "$me_name: неизвестная команда '$1'" >&2; ctl_usage >&2; exit 2 ;;
+        *) { ctl_usage; die "Неизвестный аргумент '$1'"; } ;;
     esac
 }
 
