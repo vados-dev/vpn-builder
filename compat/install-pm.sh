@@ -136,12 +136,10 @@ pm_install() {
         confirm "Установлена другая версия — заменить на текущую?" "y" && ok "Замена подтверждена" || { ok "Обновление отменено"; exit 0; }
     else
         confirm "Установить ${PROGRAM} в ${BIN_DIR}?" "y" && ok "Установка подтверждена" || { ok "Установка отменена"; exit 0; }
-    fi
-    install -m 755 "$src" "$BIN_DIR/$PROGRAM" || die "Ошибка установки ${PROGRAM}"
+    fi    install -m 755 "$src" "$BIN_DIR/$PROGRAM" || die "Ошибка установки ${PROGRAM}"
     log "установлена в ${BIN_DIR}/${PROGRAM}"
     [ -f "$SELF" ] && [ "${SELF%/*}" != "$BIN_DIR" ] && { rm -f "$SELF"; log "Установщик удалён: ${SELF}"; }
-    trap - EXIT
-    if [ "$fail" -eq 0 ]; then ok "Установка завершена."; else err "Установлено частично: ${fail} симлинк(ов) не создан(о) — перечислено выше"; exit 1; fi
+    trap - EXIT; ok "Установка завершена."
 }
 
 usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
