@@ -77,7 +77,7 @@ else
 fi
 
 dbg_cmd() { cmd "$*"; color_cmd "$*"; }
-run() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*"; }
+run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*"; }
 
 # --- определение бэкенда ---
 if command -v dnf >/dev/null 2>&1; then
@@ -92,7 +92,7 @@ fi
 
 # sudo не нужен, если запущены от root
 maybe_sudo() {
-    if [ "$(id -u)" = "0" ]; then run "$@"; else run sudo "$@"; fi
+    if [ "$(id -u)" = "0" ]; then run_cmd "$@"; else run_cmd sudo "$@"; fi
 }
 
 pm_install() {
@@ -128,9 +128,9 @@ install_pkgs() {
 
 list_pkgs() {
     case "${1:-installed}" in
-        installed)  [ "$PKG" = apt ] && run dpkg -l | awk '/^ii/{print $2, $3}' || run "$PKG" list installed ;;
-        upgradable) [ "$PKG" = apt ] && run apt list --upgradable || run "$PKG" check-update ;;
-        all)        [ "$PKG" = apt ] && run apt-cache pkgnames || run "$PKG" list available ;;
+        installed)  [ "$PKG" = apt ] && run_cmd dpkg -l | awk '/^ii/{print $2, $3}' || run_cmd "$PKG" list installed ;;
+        upgradable) [ "$PKG" = apt ] && run_cmd apt list --upgradable || run_cmd "$PKG" check-update ;;
+        all)        [ "$PKG" = apt ] && run_cmd apt-cache pkgnames || run_cmd "$PKG" list available ;;
     esac
 }
 
@@ -160,13 +160,13 @@ case "$cmd" in
         case "$PKG" in apt) maybe_sudo apt-get clean; maybe_sudo apt-get autoclean ;; *) maybe_sudo "$PKG" clean all ;; esac ;;
     search)
         [ $# -eq 0 ] && { echo "pm: укажите запрос" >&2; exit 2; }
-        case "$PKG" in apt) run apt-cache search "$@" ;; *) run "$PKG" search "$@" ;; esac ;;
+        case "$PKG" in apt) run_cmd apt-cache search "$@" ;; *) run_cmd "$PKG" search "$@" ;; esac ;;
     show|info)
-        case "$PKG" in apt) run apt-cache show "$@" ;; *) run "$PKG" info "$@" ;; esac ;;
+        case "$PKG" in apt) run_cmd apt-cache show "$@" ;; *) run_cmd "$PKG" info "$@" ;; esac ;;
     whatprovides)
-        case "$PKG" in apt) run dpkg -S "$@" ;; *) run "$PKG" provides "$@" ;; esac ;;
+        case "$PKG" in apt) run_cmd dpkg -S "$@" ;; *) run_cmd "$PKG" provides "$@" ;; esac ;;
     version)
-        case "$PKG" in apt) run dpkg-query -W -f '${Package} ${Version}\n' "$@" ;; *) run rpm -q "$@" ;; esac ;;
+        case "$PKG" in apt) run_cmd dpkg-query -W -f '${Package} ${Version}\n' "$@" ;; *) run_cmd rpm -q "$@" ;; esac ;;
     list) list_pkgs "$@" ;;
     hold)
         case "$PKG" in apt) maybe_sudo apt-mark hold "$@" ;; *) maybe_sudo "$PKG" versionlock add "$@" ;; esac ;;
