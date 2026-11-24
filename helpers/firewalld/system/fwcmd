@@ -127,26 +127,32 @@ confirm() { local a; [ "${1:-0}" = "1" ] && return 0; [ -t 0 ] || [ -t 1 ] || di
 # вызов: confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y" && ok 0 "Подтверждено" || { ok 1 "Отменено пользователем"; exit 0; }
 
 
-# ![Агенту]: Предложить, как оптимизировать фунцию установки.
-# Хотелось использовать mktemp, но не сходиться при установке с помощью curl, на лету...
-# В любом случае, сам себя он удялять обязан, тем более, что есть переменst $SELF и $ME_SELF...
-# Предложить функционал удаления, если скрипт уже установлен.
-# Идея: если скрипт уже установлен, то при повторной установке,
-# предложить удалить старую версию и установить новую. 
-# Либо предложить обновить, если версия скрипта отличается от установленной и файлы на месте.
 fwcmd_install() {
     [ "$1" = "-h" ] || [ "$1" = "--help" ] && { install_usage; exit 0; }
-    [[ -z "$1" ]] || assume_yes="$1"; [[ -z "$2" ]] || BIN_DIR="$2"
-    confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y" || { log "Установка отменена"; exit 0; }
-    [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
-    install -m 755 ${me_name} "${BIN_DIR}/${PROGRAM}" || die "Ошибка установки ${PROGRAM}"
+    [[ -n "$1" ]] && assume_yes="$1"; [[ -n "$2" ]] && BIN_DIR="$2"
+    local src
+    if [ -r "$SELF" ] && [ -s "$SELF" ]; then src="$SELF"; else
+        src="$(mktemp -t install-fwcmd-XXXXXX)" || die "Не удалось создать временный файл"
+        cat > "$src" || die "Не удалось прочитать сам скрипт из stdin (curl | bash)"
+        chmod 755 "$src"; trap 'rm -f "$src"' EXIT
+        log "Источник установки: stdin -> ${src}"
+    fi
+    [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR" || die "Не могу создать ${BIN_DIR}"
+    if [ -f "$BIN_DIR/$PROGRAM" ]; then
+        if cmp -s "$src" "$BIN_DIR/$PROGRAM"; then ok 0 "Уже установлена та же версия: ${BIN_DIR}/${PROGRAM}"; exit 0; fi
+        confirm "$assume_yes" "Установлена другая версия — заменить на текущую?" "y" && ok 0 "Замена подтверждена" || { ok 1 "Обновление отменено"; exit 0; }
+    else
+        confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y" && ok 0 "Установка подтверждена" || { ok 1 "Установка отменена"; exit 0; }
+    fi
+    install -m 755 "$src" "$BIN_DIR/$PROGRAM" || die "Ошибка установки ${PROGRAM}"
     log "установлена в ${BIN_DIR}/${PROGRAM}"
     log "создаю симлинки..."
-    cd "${BIN_DIR}" || die "Ошибка перехода в ${BIN_DIR}"
     for link in "${SYMLINKS[@]}"; do
-        ln -sf "${PROGRAM}" "${link}" || die "Ошибка создания симлинка ${link}"
+        ln -sf "$PROGRAM" "${BIN_DIR}/${link}" || die "Ошибка создания симлинка ${link}"
         log "- ${link} -> ${PROGRAM}"
     done
+    [ -f "$SELF" ] && [ "${SELF%/*}" != "$BIN_DIR" ] && { rm -f "$SELF"; log "Установщик удалён: ${SELF}"; }
+    trap - EXIT
     ok 0 "Установка завершена."
 }
 
