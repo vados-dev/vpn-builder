@@ -53,38 +53,55 @@ PARENT_DIR="$(dirname "${SELF_DIR}")"
 ME_SELF="${SELF##*/}"
 ME_CLEAN="${ME_SELF%.*}"
 
-me_name="${ME_SELF}" #me_name="${0##*/}"
+me_name="${0##*/}"
 me_args=( "$@" )
 
-dbg=0
+#-> Static vars:
+PROGRAM="pm"
+BIN_DIR="/usr/local/bin"
+assume_yes=0 # Автоматически отвечать "да" на все вопросы (для скриптов/cron)
+DEF_OK_RE="true|success|^0$"
+DEF_FAIL_RE="false|Error|^1$"
+OUT=""      # вывод последней команды из overlay_cmd
+RC=0        # реальный код последней команды из overlay_cmd
+
+dbg=1
 
 case "$me_name" in
   install-pm.sh|install-pm)
-    case " ${me_args[*]-} " in
-      *" -i "*|*" --install "*) : ;;   # ключ уже задан — не дублируем
-      *) set -- -i "$@" ;;
-    esac
-    ;;
+    *) set -- -i "$@" ;;
 esac
 
 if [ -t 0 ]; then
-  cmd()  { printf '[\033[1;33m✨\033[0m]#: `\033[1m%s\033[0m`\n' "$*"; }
-  color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; }; }
-  log()  { printf '\033[1;34m 📋 INFO:\033[0;8m [%s] - %s.\033[0m\n' "$me_name" "$*"; }
-  warn() { printf '\033[1;33m ⚡ WARN:\033[0;1m [%s] - %s.\033[0m\n' "$me_name" "$*" >&2; }
-  err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; }
-  die()  { printf '\033[1;31m ❌ CRITICAL:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; exit 1; }
+    cmd()        { printf '[\033[1;33m✨\033[0m]#: ' >&2; printf '%q ' "$@" >&2; printf '\033[0m\n' >&2; }
+    answer_box() { printf '\033[1;33m ⚡ %s\033[0m\n' "$*"; }
+    ok()        { local rc="$?" m="${1:-}"; [ -z "$m" ] && m="rc=${rc}"; [ "$rc" -eq 0 ] && printf '\033[1;32m √ %s\033[0m\n' "$m" || printf '\033[1;31m ✘ %s\033[0m\n' "$m"; return "$rc"; }
+    tg_ask()     { [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_CHAT:-}" ] || die "tg_ask: не заданы TG_TOKEN/TG_CHAT"; curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="${1:-Требуется подтверждение}" >/dev/null; die "tg_ask: ожидание ответа через getUpdates — не реализовано (заглушка)"; }
+    log()  { printf '\033[1;34m 📋 INFO:\033[0;8m [%s] - %s.\033[0m\n' "$me_name" "$*"; }
+    warn() { printf '\033[1;33m ⚡ WARN:\033[0;1m [%s] - %s.\033[0m\n' "$me_name" "$*" >&2; }
+    err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; }
+    die()  { printf '\033[1;31m ❌ CRITICAL:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; exit 1; }
+    prompt_yn() { local d="${2,,}"; [ "$d" = "y" ] && printf '\033[1m%s [Y/n]:\033[0m ' "$1" || printf '\033[1m%s [y/N]:\033[0m ' "$1"; }
+    ask()        { local a; if [ -t 0 ]; then read -r -p "$(prompt_yn "${1:-Продолжить?}" "${2:-Y}")" a < /dev/tty; case "${a,,}" in y|yes) return 0;; *) return 1;; esac; else tg_ask "$1"; fi; }
 else
-  cmd()  { printf '[*]#: `%s`\n' "$*"; }
-  color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '%s\n' "$out" || { printf '%s\n' "$out"; }; }
-  log()  { printf '[INFO] [%s] - %s.\n' "$me_name" "$*"; }
-  warn() { printf '[WARN] [%s] - %s.\n' "$me_name" "$*" >&2; }
-  err()  { printf '[ERROR] [%s] - %s!\n' "$me_name" "$*" >&2; }
-  die()  { printf '[CRITICAL] [%s] - %s!\n' "$me_name" "$*" >&2; exit 1; }
+    cmd()        { printf '[*]#: ' >&2; printf '%q ' "$@" >&2; printf '\n' >&2; }    
+    answer_box() { printf ' ⚡ %s\n' "$*"; }
+    ok()        { local rc="$?" m="${1:-}"; [ -z "$m" ] && m="rc=${rc}"; [ "$rc" -eq 0 ] && printf ' √ %s\n' "$m" || printf ' ✘ %s\n' "$m"; return "$rc"; }
+    tg_ask()     { [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_CHAT:-}" ] || die "tg_ask: не заданы TG_TOKEN/TG_CHAT"; curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="${1:-Требуется подтверждение}" >/dev/null; die "tg_ask: ожидание ответа через getUpdates — не реализовано (заглушка)"; }
+    log()  { printf '[INFO] [%s] - %s.\n' "$me_name" "$*"; }
+    warn() { printf '[WARN] [%s] - %s.\n' "$me_name" "$*" >&2; }
+    err()  { printf '[ERROR] [%s] - %s!\n' "$me_name" "$*" >&2; }
+    die()  { printf '[CRITICAL] [%s] - %s!\n' "$me_name" "$*" >&2; exit 1; }
+    rompt_yn() { local d="${2,,}"; [ "$d" = "y" ] && printf '%s [Y/n]: ' "$1" || printf '%s [y/N]: ' "$1"; }
+    ask()        { local a; if [ -t 0 ]; then read -r -p "$(prompt_yn "${1:-Продолжить?}" "${2:-Y}")" a < /dev/tty; case "${a,,}" in y|yes) return 0;; *) return 1;; esac; else tg_ask "$1"; fi; }
 fi
 
-dbg_cmd() { cmd "$*"; color_cmd "$*"; }
-run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*"; }
+overlay_cmd() { local fork="$1"; shift; [ "$1" = "--" ] && shift; local out rc v msg; out="$("$@")"; rc=$?; RC=$rc; OUT="$out"; if [ "$fork" = "--" ]; then if [ "$rc" -eq 0 ] && [[ "$out" =~ (${DEF_OK_RE}) ]]; then v=0; msg="$out"; elif [ "$rc" -eq 0 ] && [ -z "$out" ]; then v=0; msg="пусто (уже выполнено)"; elif [[ "$out" =~ (${DEF_FAIL_RE}) ]] || [ "$rc" -ne 0 ]; then v=1; msg="$out"; else [ "$dbg" -eq 1 ] && answer_box "Неожиданный вывод: ${out:-пусто}"; [ "${TG_NOTIFY:-0}" = 1 ] && tg_notify "${me_name}: неожиданный вывод: ${out:-пусто}"; v=1; msg=""; fi; [ "$v" -eq 0 ]; ok "$msg"; return "$v"; fi; [[ "$(declare -p "$fork" 2>/dev/null)" == "declare -A"* ]] || die "overlay_cmd: '$fork' — не ассоциативный массив"; local tk="${fork}[true]" fk="${fork}[false]" ak="${fork}[answer]"; local ok_re="${!tk}" fail_re="${!fk}" ans_re="${!ak}"; if [ "$rc" -eq 0 ] && [ -n "$ok_re" ] && [[ "$out" =~ ($ok_re) ]]; then v=0; elif [ -n "$fail_re" ] && [[ "$out" =~ ($fail_re) ]]; then v=1; elif [ "$rc" -ne 0 ]; then v=1; else v=2; fi; return "$v"; }
+input_cmd()   { [ "$dbg" -eq 1 ] && cmd "${@:3}"; overlay_cmd "$@"; }
+run_cmd()     { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
+tg_notify()   { [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_CHAT:-}" ] || die "tg_notify: не заданы TG_TOKEN/TG_CHAT"; curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="$*" >/dev/null; }
+
+confirm() { local a; [ "${assume_yes:-0}" = "1" ] && { log "Автоподтверждение: -y"; return 0; }; [ -t 0 ] || [ -t 1 ] || die "Нет интерактивного терминала — используйте -y"; read -r -p "$(prompt_yn "${1:-Уверены?}" "${2:-n}")" a < /dev/tty || die "Поток ввода закрыт — используйте -y"; case "${a,,}" in y|yes) return 0;; *) warn "Отменено пользователем"; exit 0;; esac; }
 
 # --- определение бэкенда ---
 if command -v dnf >/dev/null 2>&1; then
@@ -103,14 +120,31 @@ maybe_sudo() {
 }
 
 pm_install() {
-    local bin_dir="/usr/local/bin" prg="pm"
-    [[ -z "$1" ]] || bin_dir="$1"
-    [ -d "$bin_dir" ] || mkdir -p "$bin_dir"
-    install -m 755 ${me_name} "${bin_dir}/${prg}" > /dev/null 2>&1 || die "Ошибка установки ${prg}!"
-    log "${me_name} успешно установлен в ${bin_dir}/${prg}"
+    [ "$1" = "-h" ] || [ "$1" = "--help" ] && { install_usage; exit 0; }
+    [[ -n "$1" ]] && assume_yes="$1"; [[ -n "$2" ]] && BIN_DIR="$2"
+    local src
+    if [ -r "$SELF" ] && [ -s "$SELF" ]; then src="$SELF"; else
+        src="$(mktemp -t install-fwcmd-XXXXXX)" || die "Не удалось создать временный файл"
+        cat > "$src" || die "Не удалось прочитать сам скрипт из stdin (curl | bash)"
+        chmod 755 "$src"; trap 'rm -f "$src"' EXIT
+        log "Источник установки: stdin -> ${src}"
+    fi
+    [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR" || die "Не могу создать ${BIN_DIR}"
+    if [ -f "$BIN_DIR/$PROGRAM" ]; then
+        cmp -s "$src" "$BIN_DIR/$PROGRAM" && { ok "Уже установлена та же версия: ${BIN_DIR}/${PROGRAM}"; exit 0; }
+        confirm "Установлена другая версия — заменить на текущую?" "y" && ok "Замена подтверждена" || { ok "Обновление отменено"; exit 0; }
+    else
+        confirm "Установить ${PROGRAM} в ${BIN_DIR}?" "y" && ok "Установка подтверждена" || { ok "Установка отменена"; exit 0; }
+    fi
+    install -m 755 "$src" "$BIN_DIR/$PROGRAM" || die "Ошибка установки ${PROGRAM}"
+    log "установлена в ${BIN_DIR}/${PROGRAM}"
+    [ -f "$SELF" ] && [ "${SELF%/*}" != "$BIN_DIR" ] && { rm -f "$SELF"; log "Установщик удалён: ${SELF}"; }
+    trap - EXIT
+    if [ "$fail" -eq 0 ]; then ok "Установка завершена."; else err "Установлено частично: ${fail} симлинк(ов) не создан(о) — перечислено выше"; exit 1; fi
 }
 
 usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+install_usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 
 pkg_is_local() { case "$1" in ./*|/*) return 0 ;; *) return 1 ;; esac; }
 
