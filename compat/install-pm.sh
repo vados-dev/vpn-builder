@@ -102,7 +102,7 @@ input_cmd()   { [ "$dbg" -eq 1 ] && cmd "${@:3}"; overlay_cmd "$@"; }
 run_cmd()     { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
 tg_notify()   { [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_CHAT:-}" ] || die "tg_notify: не заданы TG_TOKEN/TG_CHAT"; curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="$*" >/dev/null; }
 
-confirm() { local a; [ "${assume_yes:-0}" = "1" ] && { log "Автоподтверждение: -y"; return 0; }; [ -t 0 ] || [ -t 1 ] || die "Нет интерактивного терминала — используйте -y"; read -r -p "$(prompt_yn "${1:-Уверены?}" "${2:-n}")" a < /dev/tty || die "Поток ввода закрыт — используйте -y"; case "${a,,}" in y|yes) return 0;; *) warn "Отменено пользователем"; exit 0;; esac; }
+confirm() { local a; [ "${assume_yes:-0}" = "1" ] && { log "Автоподтверждение: -y"; return 0; }; [ -t 0 ] || [ -t 1 ] || die "Нет интерактивного терминала — используйте -y"; read -r -p "$(prompt_yn "${1:-Уверены?}" "${2:-n}")" a < /dev/tty || die "Поток ввода закрыт — используйте -y"; a="${a:-${2:-n}}"; case "${a,,}" in y|yes) return 0;; *) warn "Отменено пользователем"; exit 0;; esac; }
 
 # --- определение бэкенда ---
 if command -v dnf >/dev/null 2>&1; then
