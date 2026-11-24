@@ -1,9 +1,10 @@
 # :boom: Таблица символов :boom: 
 
+<p align="center">
+<a href="https://gist.github.com/ricealexander/ae8b8cddc3939d6ba212f953701f53e6"><img src="https://img.shields.io/badge/Gist_с_полным_списком_GitHub_emoji-151b23?style=plastic&logoColor=white&labelColor=0000FF&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)" alt="Gist с полным списком GitHub emoji" /></a>
+<a href="https://github.com/vados-dev/emoji-cheat-sheet"><img src="https://img.shields.io/badge/GitHub_vados--dev_с_emoji-151b23?style=plastic&logoColor=white&labelColor=0000FF&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)" alt="GitHub vados-dev с emoji" /></a>
+</p>
 
-
-- [Gist с полным списком GitHub-эмодзи](https://gist.github.com/ricealexander/ae8b8cddc3939d6ba212f953701f53e6)
-- [GitHub vados-dev](https://github.com/vados-dev/emoji-cheat-sheet)
 
 
 <div align="center">
