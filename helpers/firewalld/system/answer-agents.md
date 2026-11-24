@@ -92,6 +92,77 @@ run_cmd()     - Функция для первичной обработки ко
 Изначально color_cmd использовалась для вывода в цвете ответов success от firewall-cmd, но это
 скорее функционал функции ok.". А
 
+```Теперь понял правильно: ok() вообще не решает — она чистый форматтер, получающий [0|1|true|false] и текст; решать должна overlay_cmd. А fwctl -st страдал ровно потому, что color_cmd захватывал stdout целиком и красил его, независимо от содержимого. Развязка такая: прозрачные команды идут напрямую (run_cmd), судимые — через перехват (overlay_cmd), а ok() только рисует якорь.
+
+```
+Блок комментариев:
+```
+# ![От агента]: Архитектура по AGENTS.md — три слоя, каждый со своей зоной:
+#   run_cmd()    — ПРОЗРАЧНЫЙ прогон: dbg-баннер + exec без захвата. Для команд,
+#                  чей вывод ценен сам по себе: systemctl status, journalctl,
+#                  firewall-cmd --list-all. Краску systemctl и пайпы не трогаем.
+#                  Это и ответ на "fwctl -st всё зелёным": захват убран, вывод
+#                  идёт как есть, своими цветами.
+#   overlay_cmd() — СУДЬЯ (бывшая color_cmd): выполняет команду ИЛИ функцию,
+#                  перехватывает stdout + код выхода, решает по ДВУМ сигналам:
+#                    1. код выхода (главный — честный);
+#                    2. сканирование вывода: OK_PAT (если задан, напр. 'success')
+#                       и FAIL_PAT (error|fail|denied|refused по умолчанию) —
+#                       ловит случаи, когда код врёт или нужны ключевые слова.
+#                  По решению вызывает ok() и ОБЯЗАТЕЛЬНО возвращает код —
+#                  вызов можно ветвить тут же: overlay_cmd ... || { err; exit 2; }
+#                  Универсальность в том, что "$@" работает и с функциями скрипта:
+#                  overlay_cmd my_fn — перехват return-кода и stdout функции.
+#   ok()         — ЧИСТЫЙ форматтер: на входе [0|1] или [true|false] (case),
+#                  на выходе √/✘ и текст ($2 или дефолт из самой функции).
+#                  Ничего не выполняет и не решает. Решение — всегда у overlay_cmd
+#                  или у вызывающего: ok "$?" "Текст".
+#   input_cmd()  — витрина по AGENTS.md: dbg-баннер (первичная зона dbg) +
+#                  передача в overlay_cmd. Для команд, чей ответ надо "судить":
+#                  fwreload, fwperm, fwchk — firewall-cmd отвечает "success".
+#   color_cmd — УСТАРЕЛА: её роль переехала в overlay_cmd (переименование честнее
+#                  алиаса: имя больше не обещает "красить всё подряд").
+#   Разделение stdin/stdout: prompt у read -p пишется в STDERR, поэтому захват
+#   stdout в overlay_cmd не глотает диалог confirm — функция подтверждения может
+#   безопасно крутиться под перехватом.
+```
+Ветка tty:
+```
+    cmd()        { printf '[\033[1;33m✨\033[0m]#: ' >&2; printf '%q ' "$@" >&2; printf '\033[0m\n' >&2; }
+    ok()         { case "$1" in 0|true) printf '\033[1;32m √ %s\033[0m\n' "${2:-Ok}";; *) printf '\033[1;31m ✘ %s\033[0m\n' "${2:-Fail}";; esac; }
+    run_cmd()    { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
+    overlay_cmd(){ local out rc; out="$("$@")"; rc=$?; if [ "$rc" -eq 0 ] && { [ -z "$OK_PAT" ] || [[ "$out" =~ $OK_PAT ]]; } && ! [[ "$out" =~ (${FAIL_PAT:-error|fail|denied|refused|not recognized}) ]]; then ok 0 "$out"; else ok 1 "${out:-Ошибка}"; fi; return "$rc"; }
+    input_cmd()  { [ "$dbg" -eq 1 ] && cmd "$@"; overlay_cmd "$@"; }
+```
+После else — те же, без краски, сигнатуры идентичны:
+```
+    cmd()        { printf '[*]#: ' >&2; printf '%q ' "$@" >&2; printf '\n' >&2; }
+    ok()         { case "$1" in 0|true) printf ' √ %s\n' "${2:-Ok}";; *) printf ' ✘ %s\n' "${2:-Fail}";; esac; }
+    run_cmd()    { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
+    overlay_cmd(){ local out rc; out="$("$@")"; rc=$?; if [ "$rc" -eq 0 ] && { [ -z "$OK_PAT" ] || [[ "$out" =~ $OK_PAT ]]; } && ! [[ "$out" =~ (${FAIL_PAT:-error|fail|denied|refused|not recognized}) ]]; then ok 0 "$out"; else ok 1 "${out:-Ошибка}"; fi; return "$rc"; }
+    input_cmd()  { [ "$dbg" -eq 1 ] && cmd "$@"; overlay_cmd "$@"; }
+```
+Применение по командам — это и есть правки «везде, где используется»:
+```
+    fwreload)  input_cmd "$fw_exec" --reload ;;        # "success" → √
+    fwperm)    input_cmd "$fw_exec" --permanent "$@" ;;
+    fwchk)     input_cmd "$chk_cmd" "$chk_args" ;;
+    # в fwctl_cmd:
+    -st|status)    run_cmd $fwctl_exec status $fw_service ;;   # сырой вывод, краски systemctl сохранены
+    -j|journ)      run_cmd journalctl -xeu $fw_service ;;
+    -e|enable)     run_cmd $fwctl_exec enable $fw_service && ok 0 "Служба включена" || ok 1 "Ошибка enable" ;;
+    -rl|reload)    input_cmd "$fw_exec" --reload ;;
+    -cc|chk_conf)  input_cmd "$chk_cmd" "$chk_args" ;;
+```
+confirm вписывается в схему — он перестаёт печатать сам и просто возвращает код, якорь рисует вызывающий через ok:
+```
+    confirm() { local a; [ "${1:-0}" = "1" ] && return 0; [ -t 0 ] || [ -t 1 ] || die "Нет интерактивного терминала — используйте -y"; read -r -p "$(prompt_yn "${2:-Уверены?}" "${3:-Y}")" a < /dev/tty || die "Поток ввода закрыт — используйте -y"; case "${a,,}" in y|yes) return 0;; *) return 1;; esac; }
+```    
+```
+# вызов: confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y" && ok 0 "Подтверждено" || { ok 1 "Отменено пользователем"; exit 0; }
+```
+
+
 ```
 По «подключаться из готовой библиотеки» — честная картина:
 
