@@ -6,12 +6,15 @@
 1. [Описание fwcmd](#описание-fwcmd)
 2. [Установка и запуск fwcmd](#установка-и-запуск-fwcmd)
 
+
+
+
 </div>
 
----
+
 
 ## 📋 Описание `fwcmd`
-`fwcmd` -- этопомощник с командами firewalld.
+fwcmd - этопомощник с командами firewalld.
 
 ## 📂 Структура файлов
 
@@ -30,21 +33,14 @@
             └── privkey.pem
 ```
 
----
+## 🗂️ Исходные конфигурационные файлы
 
-```text
-/usr/local/bin/fwcmd
-              /@fwreload
-              /@fwperm
+- Сам скрипт.../usr/local/bin/fwcmd
+-инки: 
 
+- fwreload
+- fwctl
 ```
-
-> - Сам скрипт..."/usr/local/bin/fwcmd"
-
-Симлинки: 
-
-  / fwreload
-  / fwctl
 
 
 ## 🛠 Установка:
@@ -84,7 +80,7 @@ fwreload
 [✨]#: --reload
  √ success
 ```
-
+---
 
 ### Использование:
    
