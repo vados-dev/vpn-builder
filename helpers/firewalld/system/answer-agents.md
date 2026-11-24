@@ -1,4 +1,70 @@
-##
+## Вопрос
+
+
+
+Общий блок ПОСЛЕ if/else (одна копия на оба мира — краску им дают ok/answer_box из ветки):
+```
+    overlay_cmd() { local fork="$1"; shift; local out rc v; out="$("$@")"; rc=$?; RC=$rc; OUT="$out"; if [ "$fork" = "--" ]; then if [ "$rc" -eq 0 ] && [[ "$out" =~ (${DEF_OK_RE}) ]]; then v=0; elif [[ "$out" =~ (${DEF_FAIL_RE}) ]] || [ "$rc" -ne 0 ]; then v=1; else [ "$dbg" -eq 1 ] && answer_box "Неожиданный вывод: ${out:-пусто}"; [ "$TG_NOTIFY" = 1 ] && tg_notify "${me_name}: неожиданный вывод: ${out:-пусто}"; v=1; fi; ok "$v" "$out"; return "$v"; fi; [[ "$(declare -p "$fork" 2>/dev/null)" == "declare -A"* ]] || die "overlay_cmd: '$fork' — не ассоциативный массив"; local tk="${fork}[true]" fk="${fork}[false]" ak="${fork}[answer]"; local ok_re="${!tk}" fail_re="${!fk}" ans_re="${!ak}"; if [ "$rc" -eq 0 ] && [ -n "$ok_re" ] && [[ "$out" =~ ($ok_re) ]]; then v=0; elif [ -n "$fail_re" ] && [[ "$out" =~ ($fail_re) ]]; then v=1; elif [ "$rc" -ne 0 ]; then v=1; else v=2; fi; return "$v"; }
+    input_cmd()   { [ "$dbg" -eq 1 ] && cmd "${@:2}"; overlay_cmd "$@"; }
+    run_cmd()     { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
+    tg_notify()   { [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_CHAT:-}" ] || die "tg_notify: не заданы TG_TOKEN/TG_CHAT"; curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="$*" >/dev/null; }
+```
+
+Вызовы — два стиля рядом:
+
+```
+# Дефолт: overlay сам зовёт ok, сюрприз = отказ (dbg=1 даст ⚡-бокс)
+    fwreload)  input_cmd -- "$fw_exec" --reload ;;
+    fwperm)    [ $# -eq 0 ] && { err "fwperm требует аргументов"; usage; exit 2; }; input_cmd -- "$fw_exec" --permanent "$@" ;;
+
+# Вилка: ok при выходе НЕ звенит — вердикт ждём в $? вызова
+declare -A RESP=([true]="success" [false]="error|fail" [answer]="")
+input_cmd RESP -- "$fw_exec" --permanent "$@"
+    case $? in
+        0) ok 0 "success" ;;
+        1) ok 1 "отказ" ;;
+        2) answer_box "Ответ команды: $OUT" ;;
+    esac
+unset RESP
+```
+
+:warning:**Что здесь решение, а что оговорка:**
+```
+    Ключи успеха/отказа живут для ok — дефолтный путь ok "$v" "$out" печатает якорь с текстом вывода (√ success), вилочный путь вернёт вердикт числом, и окей зовёт только тот, кто ждёт. Ни одна точка не дублирует решение.
+    ${!tk} вместо local -n — косвенная адресация на элементы массива, живёт с bash 4.0 (RHEL/CentOS 7 — bash 4.2, nameref там недоступен, а ${a,,} уже требует 4.0, так что потолок не уронили).
+    local rc="$?" первым оператором в ok — до case и второго local: $? иначе уйдёт.
+    В fork-режиме rc=2 означает «не да и не нет» — и это единственное место, где реальный код команды отличается от вердикта: он в RC, если понадобится докопаться.
+    Проверьте связку: ./fwreload (дефолт, √ success) и вилку на fwperm с фальшивым ключом в [true] — должно уйти в 2 и показать вывод в answer_box. Сядет — я готов выкладывать fwcmd_install.
+```
+
+#### Уточнение
+Куда это? "# Вилка: ok при выходе НЕ звенит — вердикт ждём в $? вызова
+declare -A RESP=([true]="success" [false]="error|fail" [answer]="")
+input_cmd RESP -- "$fw_exec" --permanent "$@"
+case $? in
+    0) ok 0 "success" ;;
+    1) ok 1 "отказ" ;;
+    2) answer_box "Ответ команды: $OUT" ;;
+esac
+unset RESP"
+
+
+
+**В fw_cmd(), в ветку fwperm) — это не отдельный блок куда-то в тело скрипта, а шаблон вызова с вилкой для конкретной команды. Вилка нужна там, где мы знаем, что команда может ответить, а значит — прямо в диспетчере. Вот fw_cmd целиком после правки, в вашем стиле:**
+
+```
+fw_cmd() {
+    [ "${me_name}" != "install-fwcmd.sh" ] && ([ "$1" = "-h" ] || [ "$1" = "--help" ]) && { usage; exit 0; }
+    case "${me_name}" in
+        fwreload)           input_cmd -- "$fw_exec" --reload ;;
+        fwperm)             [ $# -eq 0 ] && { err "fwperm требует аргументов"; usage; exit 2; }; declare -A RESP=([true]="success" [false]="error|fail|NOT_AUTHORIZED" [answer]=""); input_cmd RESP -- "$fw_exec" --permanent "$@"; case $? in 0) ok 0 "success" ;; 1) ok 1 "отказ" ;; 2) answer_box "Ответ команды: $OUT" ;; esac; unset RESP ;;
+        fwchk)              input_cmd -- "$chk_cmd" "$chk_args" ;;
+        fwctl)              fwctl_cmd "$@" ;;
+        install-fwcmd.sh)   fwcmd_install "$@" ;;
+        *)                  run_cmd "$fw_exec" "$@" ;;
+    esac
+}
+```
 
 
 :warning:**Три момента по размещению:**
