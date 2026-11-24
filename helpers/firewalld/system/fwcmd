@@ -140,7 +140,7 @@ fwctl_cmd() {
 }
 
 fw_cmd() {
-    [ "$1" != "-h" ] || [ "$1" != "--help" ] || { usage; exit 0; }
+    [ "$1" = "-h" ] || [ "$1" = "--help" ] && { usage; exit 0; }
     case "${me_name}" in
         fwreload)           run_cmd $fw_exec --reload ;;
         fwperm)             run_cmd $fw_exec --permanent "$@" ;;
