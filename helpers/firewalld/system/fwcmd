@@ -153,19 +153,19 @@ ctl_usage() { sed -n '42,60p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 fwctl_cmd() {
     [ $# -gt 0 ] || { err "Пустые аргументы"; ctl_usage; exit 2; }
     case $1 in
-        -e|enable)          run_cmd $fwctl_exec enable $fw_service ;;
-        -d|disable)         run_cmd $fwctl_exec disable $fw_service ;;
-        -en|enable-now)     run_cmd $fwctl_exec enable --now $fw_service ;;
-        -dn|disable-now)    run_cmd $fwctl_exec disable --now $fw_service ;;
-        -s|start)           run_cmd $fwctl_exec start $fw_service ;;
-        -k|stop)            run_cmd $fwctl_exec stop $fw_service ;;
-        -r|restart)         run_cmd $fwctl_exec restart $fw_service ;;
-        -rl|reload)         run_cmd $fw_exec --reload ;;
-        -st|status)         run_cmd $fwctl_exec status $fw_service ;;
-        -cc|chk_conf)       run_cmd $chk_cmd $chk_args ;;
-        -j|journ)           run_cmd journalctl -xeu $fw_service ;;
-        -h|--help)          ctl_usage ;;
-        *) { err "Неизвестный аргумент '$1'"; ctl_usage; exit 2; } ;;
+        -e |enable)       run_cmd $fwctl_exec enable $fw_service ;;
+        -d |disable)      run_cmd $fwctl_exec disable $fw_service ;;
+        -en|enable-now)   run_cmd $fwctl_exec enable --now $fw_service ;;
+        -dn|disable-now)  run_cmd $fwctl_exec disable --now $fw_service ;;
+        -s |start)        run_cmd $fwctl_exec start $fw_service ;;
+        -k |stop)         run_cmd $fwctl_exec stop $fw_service ;;
+        -r |restart)      run_cmd $fwctl_exec restart $fw_service ;;
+        -rl|reload)       input_cmd "$fw_exec" --reload ;;
+        -st|status)       run_cmd $fwctl_exec status $fw_service ;;   # сырой вывод, краски systemctl сохранены
+        -cc|chk_conf)     input_cmd "$chk_cmd" "$chk_args" ;;
+        -j |journ)        run_cmd journalctl -xeu $fw_service ;;        
+        -h |--help)       ctl_usage ;;
+          *) { err "Неизвестный аргумент '$1'"; ctl_usage; exit 2; } ;;
     esac
 }
 
