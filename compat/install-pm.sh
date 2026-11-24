@@ -177,7 +177,7 @@ list_pkgs() {
 }
 
 cmd="${1:-}"; shift || true
-    [ -z "$cmd" ] || { err "Пустые аргументы"; ctl_usage; exit 2; }
+    [ -z "$cmd" ] || { err "Пустые аргументы"; usage; exit 2; }
 case "$cmd" in
     update)
         case "$PKG" in apt) maybe_sudo apt-get update ;; *) maybe_sudo "$PKG" makecache --refresh 2>/dev/null || maybe_sudo "$PKG" makecache ;; esac ;;
