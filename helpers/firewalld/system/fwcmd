@@ -104,6 +104,8 @@ me_args() { printf '%s' "${me_args//_/-}"; }
 if [ -t 0 ]; then
     cmd()  { printf '[\033[1;33m✨\033[0m]#: `\033[1m%s\033[0m`\n' "$*"; }
     color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; }; }
+    answer_box() { local out="$($*)" exit_code=$?; [ $exit_code -eq 0 ] && printf '\033[1;32m √ \033[1m%s\033[0m\n' "$out" || { printf '\033[1;31m ✘ \033[1m%s\033[0m\n' "$out"; }; }
+    #ok()  { printf '\033[1;32m ✅ - %s.\033[0m\n' "$*"; }
     log()  { printf '\033[1;34m 📋 INFO:\033[0;8m [%s] - %s.\033[0m\n' "$me_name" "$*"; }
     warn() { printf '\033[1;33m ⚡ WARN:\033[0;1m [%s] - %s.\033[0m\n' "$me_name" "$*" >&2; }
     err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; }
@@ -112,6 +114,8 @@ if [ -t 0 ]; then
 else
     cmd()  { printf '[*]#: `%s`\n' "$*"; }
     color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '%s\n' "$out" || { printf '%s\n' "$out"; }; }
+    answer_box() { local out="$($*)" exit_code=$?; [ $exit_code -eq 0 ] && printf ' √ %s\n' "$out" || { printf ' ✘ %s\n' "$out"; }; }
+    #ok()  { printf '[OK] - %s.\n' "$*"; }
     log()  { printf '[INFO] [%s] - %s.\n' "$me_name" "$*"; }
     warn() { printf '[WARN] [%s] - %s.\n' "$me_name" "$*" >&2; }
     err()  { printf '[ERROR] [%s] - %s!\n' "$me_name" "$*" >&2; }
@@ -129,12 +133,10 @@ dbg_cmd() { cmd "$*"; color_cmd "$*"; }
 run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*"; }
 
 fwcmd_install() {
-    [ $1 = "-h" ] || [ $1 = "--help" ] && { install_usage; exit 0; }
+    [ "$1" = "-h" ] || [ "$1" = "--help" ] && { install_usage; exit 0; }
     [[ -z "$1" ]] || assume_yes="$1"
     [[ -z "$2" ]] || BIN_DIR="$2"
-    [[ -z "$2" ]] || assume_yes="$1"
-    [[ -z "$1" ]] || BIN_DIR="$2"
-    confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y"
+    confirm "$assume_yes" "Установить ${PROGRAM} в ${BIN_DIR}?" "y" || exit 0
     [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
     install -m 755 ${me_name} "${BIN_DIR}/${PROGRAM}" || die "Ошибка установки ${PROGRAM}"
     log "установлена в ${BIN_DIR}/${PROGRAM}"
