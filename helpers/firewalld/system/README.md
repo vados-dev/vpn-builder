@@ -11,9 +11,7 @@
 
 </div>
 
-
-
-## 📋 Описание `fwcmd`
+## 📋 Описание fwcmd
 fwcmd - этопомощник с командами firewalld.
 
 ## 📂 Структура файлов
@@ -40,8 +38,6 @@ fwcmd - этопомощник с командами firewalld.
 
 - fwreload
 - fwctl
-```
-
 
 ## 🛠 Установка:
 
@@ -51,7 +47,6 @@ fwcmd - этопомощник с командами firewalld.
     "install-fwcmd.sh 1, если в неинтерактивном режиме, с автоподтверждением (1 — да, 0 — нет).
     "install-fwcmd.sh [0|1] ~/bin", если в PATH.
 
----
 
 ## 🧪 Тестирование
 
@@ -123,28 +118,22 @@ fwreload
 
 
 ## 🚀 Установка и Запуск pm
+
 Быстрая команда (установка в /usr/local/bin):
 ```bash
-curl -fsSL -o /tmp/install-pm.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh \
-  && sudo bash /tmp/install-pm.sh -i \
-  && rm -f /tmp/install-pm.sh
+curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
 ```
-    Проверка: pm --help и pm list installed | head.
 
 Вариант без root (в ~/bin):
 ```bash
-mkdir -p ~/bin \
-  && curl -fsSL -o /tmp/install-pm.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh \
-  && sudo bash /tmp/install-pm.sh -i ~/bin \
-  && rm -f /tmp/install-pm.sh
+curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
 ```
-    Проверка: pm --help и pm list installed | head.
 
-Разовое использование без установки:
+### Разовое использование без установки
+
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh)" pm list installed
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd)"
 ```
-    Работает, потому что -i и usage() не задействуются, а $0 подменяется на pm.
 
 ## Как работает
 
