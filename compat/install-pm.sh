@@ -43,17 +43,19 @@ set -o pipefail
 # Common vars
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 SELF_DIR="$(dirname "${SELF}")"
+PARENT_DIR="$(dirname "${SELF_DIR}")"
+
 ME_SELF="${SELF##*/}"
 ME_CLEAN="${ME_SELF%.*}"
-PROGRAM="${0##*/}"
-ARGS=( "$@" )
-PARENT_DIR="$(dirname "${SELF_DIR}")"
-dbg=0
-ME="${PROGRAM}"
 
-case "$ME" in
+me_name="${ME_SELF}" #me_name="${0##*/}"
+me_args=( "$@" )
+
+dbg=0
+
+case "$me_name" in
   install-pm.sh|install-pm)
-    case " ${ARGS[*]-} " in
+    case " ${me_args[*]-} " in
       *" -i "*|*" --install "*) : ;;   # ключ уже задан — не дублируем
       *) set -- -i "$@" ;;
     esac
@@ -63,17 +65,17 @@ esac
 if [ -t 0 ]; then
   cmd()  { printf '[\033[1;33m✨\033[0m]#: `\033[1m%s\033[0m`\n' "$*"; }
   color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; }; }
-  log()  { printf '\033[1;34m 📋 INFO:\033[0;8m [%s] - %s.\033[0m\n' "$PROGRAM" "$*"; }
-  warn() { printf '\033[1;33m ⚡ WARN:\033[0;1m [%s] - %s.\033[0m\n' "$PROGRAM" "$*" >&2; }
-  err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$PROGRAM" "$*" >&2; }
-  die()  { printf '\033[1;31m ❌ CRITICAL:\033[0;1m [%s] - %s!\033[0m\n' "$PROGRAM" "$*" >&2; exit 1; }
+  log()  { printf '\033[1;34m 📋 INFO:\033[0;8m [%s] - %s.\033[0m\n' "$me_name" "$*"; }
+  warn() { printf '\033[1;33m ⚡ WARN:\033[0;1m [%s] - %s.\033[0m\n' "$me_name" "$*" >&2; }
+  err()  { printf '\033[0;31m ⚫ ERROR:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; }
+  die()  { printf '\033[1;31m ❌ CRITICAL:\033[0;1m [%s] - %s!\033[0m\n' "$me_name" "$*" >&2; exit 1; }
 else
   cmd()  { printf '[*]#: `%s`\n' "$*"; }
   color_cmd() { local cmd="$*"; { out="$($cmd)"; exit_code=$?; } && printf '%s\n' "$out" || { printf '%s\n' "$out"; }; }
-  log()  { printf '[INFO] [%s] - %s.\n' "$PROGRAM" "$*"; }
-  warn() { printf '[WARN] [%s] - %s.\n' "$PROGRAM" "$*" >&2; }
-  err()  { printf '[ERROR] [%s] - %s!\n' "$PROGRAM" "$*" >&2; }
-  die()  { printf '[CRITICAL] [%s] - %s!\n' "$PROGRAM" "$*" >&2; exit 1; }
+  log()  { printf '[INFO] [%s] - %s.\n' "$me_name" "$*"; }
+  warn() { printf '[WARN] [%s] - %s.\n' "$me_name" "$*" >&2; }
+  err()  { printf '[ERROR] [%s] - %s!\n' "$me_name" "$*" >&2; }
+  die()  { printf '[CRITICAL] [%s] - %s!\n' "$me_name" "$*" >&2; exit 1; }
 fi
 
 dbg_cmd() { cmd "$*"; color_cmd "$*"; }
@@ -99,8 +101,8 @@ pm_install() {
     local bin_dir="/usr/local/bin" prg="pm"
     [[ -z "$1" ]] || bin_dir="$1"
     [ -d "$bin_dir" ] || mkdir -p "$bin_dir"
-    install -m 755 ${ME} "${bin_dir}/${prg}" > /dev/null 2>&1 || die "Ошибка установки ${prg}!"
-    log "${ME} успешно установлен в ${bin_dir}/${prg}"
+    install -m 755 ${me_name} "${bin_dir}/${prg}" > /dev/null 2>&1 || die "Ошибка установки ${prg}!"
+    log "${me_name} успешно установлен в ${bin_dir}/${prg}"
 }
 
 usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
