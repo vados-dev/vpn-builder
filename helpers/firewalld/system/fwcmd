@@ -10,7 +10,7 @@ ME_SELF="${SELF##*/}"
 ME_CLEAN="${ME_SELF%.*}"
 
 me_name="${0##*/}"
-me_args=( "$@" )
+me_args=("$@")
 
 dbg=0
 #me_name="${0##*/}"
@@ -50,22 +50,22 @@ else
 fi
 
 dbg_cmd() { cmd "$*"; color_cmd "$*"; }
-fw_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd firewall-cmd "$me_args" || dbg_cmd firewall-cmd "$me_args"; }
+run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd firewall-cmd "$@" || dbg_cmd firewall-cmd "$@"; }
 #fw_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd firewall-cmd "$@" || dbg_cmd firewall-cmd "$@"; }
 
-fwcmd() {
+fw_cmd() {
     case "${me_name}" in
     fwreload)
-        fw_cmd --reload
+        run_cmd --reload
         ;;
     fwperm)
-        fw_cmd --permanent "$@"
+        run_cmd --permanent "$@"
         #fwreload
         ;;
     *)
-        fw_cmd "$@"
+        run_cmd "$@"
         ;;
     esac
 }
 
-fwcmd "$@"
+fw_cmd "$@"
