@@ -13,7 +13,25 @@
 ## 📋 Описание `fwcmd`
 `fwcmd` -- этопомощник с командами firewalld.
 
-### 📂 Пути по умолчанию:
+## 📂 Структура файлов
+
+```
+/
+├── nginx-root/              # Root filesystem nginx контейнера
+├── certbot-root/            # Root filesystem certbot контейнера
+├── nginx-conf/              # Mount: конфиги nginx
+│   └── default.conf         # Reverse proxy config
+├── nginx-html/              # Mount: статические файлы (если нужно)
+└── certbot-data/            # Mount: сертификаты и credentials
+    ├── cloudflare.ini       # Cloudflare API token (создать вручную!)
+    └── live/                # Let's Encrypt сертификаты
+        └── your-domain.com/
+            ├── fullchain.pem
+            └── privkey.pem
+```
+
+---
+
 ```text
 /usr/local/bin/fwcmd
               /@fwreload
