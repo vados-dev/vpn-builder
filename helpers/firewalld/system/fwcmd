@@ -9,20 +9,20 @@ PARENT_DIR="$(dirname "${SELF_DIR}")"
 ME_SELF="${SELF##*/}"
 ME_CLEAN="${ME_SELF%.*}"
 
-me_name="${0##*/}"
-me_args=("$@")
+me_name="${ME_SELF}" #me_name="${0##*/}"
+ARGS=( "$@" )
 
-dbg=0
-#me_name="${0##*/}"
+fw_exec="firewall-cmd"
+dbg=1
+
 
 # Underscore → hyphen в значениях, чтобы '-' работал только как разделитель токенов
 me() { printf '%s' "${me_name//_/-}"; }
 me_args() { printf '%s' "${me_args//_/-}"; }
 
-dbg_cmd() { printf '\033[1;1m%s\033[0m\n' "[#] $*" >&2; "$@"; }
-color_cmd() { local cmd="$*"; { out=$($cmd); exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; exit "$exit_code"; }; }
-die() { printf '\033[1;31m%s\033[0m\n' "$me_name: $*" >&2; exit 1; }
-
+#dbg_cmd() { printf '\033[1;1m%s\033[0m\n' "[#] $*" >&2; "$@"; }
+#color_cmd() { local cmd="$*"; { out=$($cmd); exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; exit "$exit_code"; }; }
+#die() { printf '\033[1;31m%s\033[0m\n' "$me_name: $*" >&2; exit 1; }
 
 case "$me_name" in
   install-fwcmd.sh|install-fwcmd)
@@ -55,16 +55,10 @@ run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd firewall-cmd "$@" || 
 
 fw_cmd() {
     case "${me_name}" in
-    fwreload)
-        run_cmd --reload
-        ;;
-    fwperm)
-        run_cmd --permanent "$@"
-        #fwreload
-        ;;
-    *)
-        run_cmd "$@"
-        ;;
+        fwreload)       run_cmd $fw_exec --reload ;;
+        fwperm)         run_cmd $fw_exec --permanent "$@" ;;
+        -i|--install)   run_cmd fwcmd_install "$@" ;;
+        *)              run_cmd "$@" ;;
     esac
 }
 
