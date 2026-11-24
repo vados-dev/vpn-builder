@@ -1,5 +1,60 @@
 #!/usr/bin/env bash
 
+#### fwcmd — помощник с командами firewalld
+###########################################
+#-> Пути по умолчанию:
+#    ------------------
+#    Сам скрипт..."/usr/local/bin/fwcmd"
+#    Симлинки....."/usr/local/bin/fwreload"
+#                 "/usr/local/bin/fwperm"
+#                 "/usr/local/bin/fwservice"
+#
+#-> Установка:
+#    ----------
+#    Сохранить/переименовать в "install-fwcmd.sh" и запустить.
+#    (Будет установлен со всеми симлинками в /usr/local/bin, а сам установщик будет удалён.)
+#-> или:
+#    "install-fwcmd.sh ~/bin", если в PATH
+#
+#-> Проверка:
+#    ---------
+#    "fwcmd --version"....Должен вернуть номер версии
+#    "fwcmdreload"........Должен ответить "success"
+#
+#######################################################
+#-> Использование:
+#    --------------
+#    Сам скрипт один, при установке создаёт симлинки на самого себя.
+#    Имя файла (симлинка), является первым аргументом (командой/функцией) при запуске скрипта. 
+#    Отсюда:
+#     - `fwcmd``.....`firewall-cmd` - Примет любое количество, любых аргументов.
+#                                     Ответ будет получен от самомго firewall-cmd.
+#     - `fwreload`...`firewall-cmd --reload` - Перечитает правила. Аргументы не требуются.
+#     - `fwperm`.....`firewall-cmd --permanent` - Добавит/удалит соответствующее правило постоянно.
+#                                                 Примет любое количество, любых аргументов.
+#                                                 Ответ будет получен от самомго firewall-cmd.
+#     - `fwchk`......`firewall-offline-cmd --check-confi` - Проверит конфигурацию без применения.
+#                                                           Аргументы не требуются.
+#
+#    Управление службой:
+#     - `fwctl`.......`systemctl` - Далее справка по аргументам.
+#    Аргументы:
+#     ----------
+#     -e |enable.........Включить службу.
+#     -d |disable........Выключить службу.
+#     -en|enable-now.....Включить службу немедленно.
+#     -dn|disable-now....Выключить службу немедленно.
+#     -s |start..........Запустить службу.
+#     -k |stop...........Остановить службу.
+#     -r |restart........Перезапустить службу.
+#     -rl|reload.........Перечитать и применить конфиги.
+#     -st|status.........Показать статус службы.
+#     -cc|chk_conf.......Проверить конфиги без применения (оффлайн).
+#     -j |journ..........Показать журнал службы.
+#     -h |--help.........Эта справка
+#
+
+set -o pipefail
 
 # Common vars
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
@@ -13,16 +68,18 @@ me_name="${ME_SELF}" #me_name="${0##*/}"
 ARGS=( "$@" )
 
 fw_exec="firewall-cmd"
-dbg=1
 
+chk_cmd=firewall-offline-cmd
+chk_args="--check-config"
+
+fw_service="firewalld.service"
+fwctl_exec="systemctl"
+
+dbg=1
 
 # Underscore → hyphen в значениях, чтобы '-' работал только как разделитель токенов
 me() { printf '%s' "${me_name//_/-}"; }
 me_args() { printf '%s' "${me_args//_/-}"; }
-
-#dbg_cmd() { printf '\033[1;1m%s\033[0m\n' "[#] $*" >&2; "$@"; }
-#color_cmd() { local cmd="$*"; { out=$($cmd); exit_code=$?; } && printf '\033[1;32m%s\033[0m\n' "$out" || { printf '\033[1;31m%s\033[0m\n' "$out"; exit "$exit_code"; }; }
-#die() { printf '\033[1;31m%s\033[0m\n' "$me_name: $*" >&2; exit 1; }
 
 case "$me_name" in
   install-fwcmd.sh|install-fwcmd)
@@ -60,12 +117,33 @@ fwcmd_install() {
     log "${me_name} успешно установлен в ${bin_dir}/${prg}"
 }
 
-usage() { sed -n '2,38p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+ctl_usage() { sed -n '37,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+
+fwctl_cmd() {
+    case $1 in
+        -e|enable)          run_cmd $fwctl_exec enable $fw_service ;;
+        -d|disable)         run_cmd $fwctl_exec disable $fw_service ;;
+        -en|enable-now)     run_cmd $fwctl_exec enable --now $fw_service ;;
+        -dn|disable-now)    run_cmd $fwctl_exec disable --now $fw_service ;;
+        -s|start)           run_cmd $fwctl_exec start $fw_service ;;
+        -k|stop)            run_cmd $fwctl_exec stop $fw_service ;;
+        -r|restart)         run_cmd $fwctl_exec restart $fw_service ;;
+        -rl|reload)         run_cmd $fw_exec --reload ;;
+        -st|status)         run_cmd $fwctl_exec status $fw_service ;;
+        -cc|chk_conf)       run_cmd $chk_cmd $chk_args ;;
+        -j|journ)           run_cmd journalctl -xeu $fw_service ;;
+        -h|--help)          ctl_usage ;;
+        *) echo -e "\n ${bred}Неизвестный аргумент: ${byellow}$1${bred}!${nc}" >&2; COMMAND="help"; HELP_EXIT_RC=1;;
+    esac
+}
 
 fw_cmd() {
     case "${me_name}" in
         fwreload)       run_cmd $fw_exec --reload ;;
         fwperm)         run_cmd $fw_exec --permanent "$@" ;;
+        fwchk)          run_cmd $chk_cmd $chk_args ;;
+        fwctl)          fwctl_cmd "$@" ;;
         -i|--install)   run_cmd fwcmd_install "$@" ;;
         *)              run_cmd "$@" ;;
     esac

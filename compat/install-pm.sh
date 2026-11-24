@@ -31,10 +31,15 @@
 #
 #-> Установка:
 #    ----------
-#    "install-pm.sh -i"
+#    Сохранить/переименовать в "install-pm.sh" и запустить.
+#    (Будет установлен в /usr/local/bin, а сам установщик будет удалён.)
 #-> или:
-#    "install-pm.sh -i ~/bin", если в PATH
-#    "pm list installed | head"
+#    "install-pm.sh ~/bin", если в PATH
+#
+#-> Проверка:
+#    ---------
+#    "pm --version"..................Должен вернуть номера версий
+#    "pm list installed | head"......Должен вернуть несколько строк с установленными пакетами
 #
 #-> Бэкенд: $PKG
 
@@ -174,6 +179,8 @@ case "$cmd" in
         case "$PKG" in apt) maybe_sudo apt-mark hold "$@" ;; *) maybe_sudo "$PKG" versionlock add "$@" ;; esac ;;
     unhold)
         case "$PKG" in apt) maybe_sudo apt-mark unhold "$@" ;; *) maybe_sudo "$PKG" versionlock delete "$@" ;; esac ;;
+    --version)
+        case "$PKG" in apt) run_cmd apt-get --version; run_cmd apt --version ;; *) run_cmd "$PKG" --version; run_cmd rpm --version ;; esac ;;
     -i|--install) pm_install "$@" ;;
     -h|--help|help|"") usage ;;
     *) err "pm: неизвестная команда '$cmd'" >&2; usage >&2; exit 2 ;;
