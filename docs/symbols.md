@@ -1,5 +1,11 @@
 # :boom: Таблица символов :boom: 
 
+
+
+- [Gist с полным списком GitHub-эмодзи](https://gist.github.com/ricealexander/ae8b8cddc3939d6ba212f953701f53e6)
+- [GitHub vados-dev](https://github.com/vados-dev/emoji-cheat-sheet)
+
+
 <div align="center">
 
 |символ|tag|
@@ -15,6 +21,7 @@
 |:question:|`:question:`|
 |:fire:|`:fire:`|
 |:sparkling_heart:|`:sparkling_heart:`|
+|:black_heart:|`:black_heart:`|
 |:green_heart:|`:green_heart:`|
 |:heart:|`:heart:`|
 |:blue_heart:|`:blue_heart:`|
