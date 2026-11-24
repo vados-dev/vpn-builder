@@ -118,8 +118,8 @@ fwcmd_install() {
     log "${me_name} успешно установлен в ${bin_dir}/${prg}"
 }
 
-usage() { sed -n '2,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
-ctl_usage() { sed -n '38,55p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,39p' "${SELF}" | sed 's/^# \{0,1\}//'; }
+ctl_usage() { sed -n '39,56p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 
 fwctl_cmd() {
     [ $# -gt 0 ] || { err "Пустые аргументы"; ctl_usage; exit 2; }
