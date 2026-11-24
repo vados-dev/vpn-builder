@@ -139,7 +139,7 @@ fwctl_cmd() {
     esac
 }
 
-fw_cmd() {
+fwcmd() {
     case "${me_name}" in
         fwreload)           run_cmd $fw_exec --reload ;;
         fwperm)             run_cmd $fw_exec --permanent "$@" ;;
@@ -150,4 +150,4 @@ fw_cmd() {
     esac
 }
 
-fw_cmd "$@"
+fwcmd "$@"
