@@ -43,7 +43,6 @@ set -o pipefail
 # Common vars
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 SELF_DIR="$(dirname "${SELF}")"
-export PATH="${SELF_DIR}:$PATH"
 ME_SELF="${SELF##*/}"
 ME_CLEAN="${ME_SELF%.*}"
 PROGRAM="${0##*/}"
