@@ -146,8 +146,8 @@ fwcmd_install() {
     ok 1 "Установка завершена."
 }
 
-dbg_cmd() { cmd "$*"; cmd "$*"; }
-run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*"; }
+dbg_cmd() { $(cmd "$*" >&2); "$@"; }
+run_cmd() { [[ "$dbg" = 0 ]] > /dev/null 2>&1 && color_cmd "$*" || dbg_cmd "$*" "$@"; }
 
 usage() { sed -n '25,43p' "${SELF}" | sed 's/^# \{0,1\}//'; }
 install_usage() { sed -n '2,25p' "${SELF}" | sed 's/^# \{0,1\}//'; }
