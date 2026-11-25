@@ -58,6 +58,10 @@
 #     -j |journ..........Показать журнал службы.
 #     -h |--help.........Эта справка.
 #
+#-> Перекати-поле: объекты firewalld по имени симлинка.
+#    Грамматика: new|del|mod-<имя>[-TARGET], TARGET: ACCEPT|REJECT|DROP.
+#    Тип объекта задаёт каталог симлинка: zones/ или policies/.
+#
 
 set -o pipefail
 
@@ -88,45 +92,6 @@ chk_args="--check-config"
 
 fw_service="firewalld.service"
 fwctl_exec="systemctl"
-
-#-> Перекати-поле: объекты firewalld по имени симлинка.
-#    Грамматика: new|del|mod-<имя>[-TARGET], TARGET: ACCEPT|REJECT|DROP.
-#    Тип объекта задаёт каталог симлинка: zones/ или policies/.
-pw_parse() {
-    local me="${me_name%.sh}"
-    case "$me" in
-        new-*|del-*|mod-*) ;;
-        *) die "pw: '$me_name' не подходит под грамматику new|del|mod-<имя>[-TARGET]" ;;
-    esac
-    PW_VERB="${me%%-*}"; me="${me#*-}"; PW_TARGET=""
-    case "${me##*-}" in
-        ACCEPT|REJECT|DROP) PW_TARGET="${me##*-}"; me="${me%-*}" ;;
-    esac
-    PW_NAME="$me"
-    [ -n "$PW_NAME" ] || die "pw: пустое имя объекта"
-}
-# каталог симлинка решает, ЧТО это (не разрешая сам симлинк!)
-pw_kind() {
-    local here; here="$(dirname "$0")"; here="$(cd "$here" 2>/dev/null && pwd)" || return 1
-    case "${here##*/}" in
-        zones)    PW_KIND="zones" ;;
-        policies) PW_KIND="policies" ;;
-        *)        return 1 ;;
-    esac
-}
-
-pwperm() {
-    declare -A RESP=([true]="success" [false]="error|fail" [answer]="")
-    input_cmd RESP -- "$fw_exec" --permanent "$@" && return 0
-    local rc=$?; [ "$rc" -eq 2 ] && warn "Ответ firewalld: $OUT"
-    return "$rc"
-}
-# pw_exists zone|policy <имя>
-pw_exists() {
-    "$fw_exec" --permanent "--get-$1s" 2>/dev/null | grep -qw "$2"
-}
-
-
 
 #-> Telegram bot vars:
 TG_NOTIFY=1
@@ -231,6 +196,40 @@ fwctl_cmd() {
         -h |--help)       ctl_usage ;;
           *) { err "Неизвестный аргумент '$1'"; ctl_usage; exit 2; } ;;
     esac
+}
+
+pw_parse() {
+    local me="${me_name%.sh}"
+    case "$me" in
+        new-*|del-*|mod-*) ;;
+        *) die "pw: '$me_name' не подходит под грамматику new|del|mod-<имя>[-TARGET]" ;;
+    esac
+    PW_VERB="${me%%-*}"; me="${me#*-}"; PW_TARGET=""
+    case "${me##*-}" in
+        ACCEPT|REJECT|DROP) PW_TARGET="${me##*-}"; me="${me%-*}" ;;
+    esac
+    PW_NAME="$me"
+    [ -n "$PW_NAME" ] || die "pw: пустое имя объекта"
+}
+# каталог симлинка решает, ЧТО это (не разрешая сам симлинк!)
+pw_kind() {
+    local here; here="$(dirname "$0")"; here="$(cd "$here" 2>/dev/null && pwd)" || return 1
+    case "${here##*/}" in
+        zones)    PW_KIND="zones" ;;
+        policies) PW_KIND="policies" ;;
+        *)        return 1 ;;
+    esac
+}
+
+pwperm() {
+    declare -A RESP=([true]="success" [false]="error|fail" [answer]="")
+    input_cmd RESP -- "$fw_exec" --permanent "$@" && return 0
+    local rc=$?; [ "$rc" -eq 2 ] && warn "Ответ firewalld: $OUT"
+    return "$rc"
+}
+# pw_exists zone|policy <имя>
+pw_exists() {
+    "$fw_exec" --permanent "--get-$1s" 2>/dev/null | grep -qw "$2"
 }
 
 pw_cmd() {
