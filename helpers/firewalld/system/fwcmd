@@ -96,7 +96,7 @@ TG_CONFIG="/etc/awg-bot.conf"
 dbg=1
 
 [ "$TG_NOTIFY" = 1 ] && source "$TG_CONFIG" 
-eche $ADMIN_ID
+echo $ADMIN_ID
 exit 0
 
 if [ -t 0 ]; then
