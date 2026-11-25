@@ -59,7 +59,7 @@ me_args=( "$@" )
 #-> Static vars:
 PROGRAM="pm"
 BIN_DIR="/usr/local/bin"
-assume_yes=0 # Автоматически отвечать "да" на все вопросы (для скриптов/cron)
+AUTO_MODE=0
 DEF_OK_RE="true|success|^0$"
 DEF_FAIL_RE="false|Error|^1$"
 OUT=""      # вывод последней команды из overlay_cmd
@@ -95,7 +95,7 @@ input_cmd()   { [ "$dbg" -eq 1 ] && cmd "${@:3}"; overlay_cmd "$@"; }
 run_cmd()     { [ "$dbg" -eq 1 ] && cmd "$@"; "$@"; }
 tg_notify()   { [ -n "${TG_TOKEN:-}" ] && [ -n "${TG_CHAT:-}" ] || die "tg_notify: не заданы TG_TOKEN/TG_CHAT"; curl -s "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d chat_id="${TG_CHAT}" -d text="$*" >/dev/null; }
 
-confirm() { local a; [ "${assume_yes:-0}" = "1" ] && { log "Автоподтверждение: -y"; return 0; }; [ -t 0 ] || [ -t 1 ] || die "Нет интерактивного терминала — используйте -y"; read -r -p "$(prompt_yn "${1:-Уверены?}" "${2:-n}")" a < /dev/tty || die "Поток ввода закрыт — используйте -y"; a="${a:-${2:-n}}"; case "${a,,}" in y|yes) return 0;; *) warn "Отменено пользователем"; exit 0;; esac; }
+confirm() { local a; [ "${AUTO_MODE:-0}" = "1" ] && { log "Автоподтверждение: -y"; return 0; }; [ -t 0 ] || [ -t 1 ] || die "Нет интерактивного терминала — используйте -y"; read -r -p "$(prompt_yn "${1:-Уверены?}" "${2:-n}")" a < /dev/tty || die "Поток ввода закрыт — используйте -y"; a="${a:-${2:-n}}"; case "${a,,}" in y|yes) return 0;; *) warn "Отменено пользователем"; exit 0;; esac; }
 
 # --- определение бэкенда ---
 if command -v dnf >/dev/null 2>&1; then
@@ -115,7 +115,7 @@ maybe_sudo() {
 
 pm_install() {
     [ "$1" = "-h" ] || [ "$1" = "--help" ] && { install_usage; exit 0; }
-    [[ -n "$1" ]] && assume_yes="$1"; [[ -n "$2" ]] && BIN_DIR="$2"
+    [[ -n "$1" ]] && AUTO_MODE="$1"; [[ -n "$2" ]] && BIN_DIR="$2"
     local src
     if [ -r "$SELF" ] && [ -s "$SELF" ]; then src="$SELF"; else
         src="$(mktemp -t install-fwcmd-XXXXXX)" || die "Не удалось создать временный файл"
