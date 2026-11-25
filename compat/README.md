@@ -95,4 +95,4 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 
 
 
-## Подключение к чужим скриптамG
+Подключение к чужим скриптамG
