@@ -50,6 +50,9 @@ fwcmd - этопомощник с командами firewalld.
 
 <a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 
+
+---
+
 ## 🧪 Тестирование
 
 :exclamation:`для чистоты тестирования запускать лучше из любого места, чтобы удостовериться, что скрипт и симлинки доступны во всей системе`
