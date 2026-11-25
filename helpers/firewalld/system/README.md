@@ -48,6 +48,8 @@ fwcmd - этопомощник с командами firewalld.
     "install-fwcmd.sh [0|1] ~/bin", если в PATH.
 
 
+<p align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF"></a></p>
+
 ## 🧪 Тестирование
 
 :exclamation:`для чистоты тестирования запускать лучше из любого места, чтобы удостовериться, что скрипт и симлинки доступны во всей системе`
