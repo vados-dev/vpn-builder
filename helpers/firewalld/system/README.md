@@ -47,6 +47,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 <div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
+
+## 🛠 Установка
+
 Сохранить/переименовать в "install-fwcmd.sh" и запустить.
     (После подтверждения, будет установлен со всеми симлинками в /usr/local/bin, а сам установщик будет удалён.)
    или:
