@@ -125,7 +125,6 @@ export -f apt apt-get
 Через PAM — это покроет SSH-сессии, логины и cron за один ход:
 
 ## Шаг 2. Включить глобально
-Через PAM — это покроет SSH-сессии, логины и cron за один ход:
 
 ```bash
   echo 'BASH_ENV=/etc/pm-compat.sh' >> /etc/environment
