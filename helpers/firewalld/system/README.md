@@ -1,9 +1,9 @@
 # Раздел helpers/firewalld/system
 
-<div align="left" style="border-bottom: 1px dotted #6c5d53;">
+<div align="left" style="border-bottom: 1.5px dotted #777;">
 
 ### Содержание раздела
-<img src="https://img.shields.io/badge/Содержание-раздела-151b23?style=flat-square&logoColor=white&labelColor=0000FF" />
+<img src="https://img.shields.io/badge/Содержание-раздела-&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)?style=flat-square&logoColor=white&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)&labelColor=0000FF" />
 1. [Описание fwcmd](#-описание-fwcmd)
 2. [Быстрый запуск](#-быстрый-запуск)
 3. [Установка](#-установка)
