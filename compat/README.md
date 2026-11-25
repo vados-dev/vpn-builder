@@ -129,11 +129,14 @@ export -f apt apt-get
 ```bash
   echo 'BASH_ENV=/etc/pm-compat.sh' >> /etc/environment
 ```
+
+```ini
 # /etc/systemd/system.conf.d/pm-compat.conf
 [Manager]
 DefaultEnvironment=BASH_ENV=/etc/pm-compat.sh
+```
 
-Для systemd-сервисов PAM не работает, им отдельно:
+Для systemd-сервисов PAM не работает, им отдельно
 
 Где эта схема честно не работает
 
