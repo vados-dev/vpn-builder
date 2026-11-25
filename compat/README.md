@@ -69,28 +69,61 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 #Команды
 
 
-
 | Команда	| apt	| dnf / yum |
 |---|---|---|
-| `pm update` |	`apt-get update` | `dnf makecache --refresh` |
-| `pm upgrade` |	`apt-get upgrade -y` | `dnf upgrade -y` |
-| `pm full-upgrade` |	`apt-get full-upgrade -y` | `dnf upgrade -y` |
-| `pm install <pkg…>` |	`apt-get install -y` | `dnf install -y` |
-| `pm reinstall <pkg…>` |	`apt-get install --reinstall` | `dnf reinstall` |
-| `pm remove <pkg…>` |	`apt-get remove -y` | `dnf remove -y` |
-| `pm purge <pkg…>` |	`apt-get purge -y` | `dnf remove -y` |
-| `pm autoremove` |	`apt-get autoremove -y` | `dnf autoremove -y` |
-| `pm clean` |	`apt-get clean + autoclean` | `dnf clean all` |
-| `pm search <query>` |	`apt-cache search` | `dnf search` |
-| `pm show <pkg>` |	`apt-cache show` | `dnf info` |
-| `pm info <pkg>` |	псевдоним `show` |	псевдоним `show` |
-| `pm list installed` |	`dpkg -l` | `dnf list installed` |
-| `pm list upgradable` |	`apt list --upgradable` | `dnf check-update`|
-| `pm list all` |	`apt-cache pkgnames` | `dnf list available` |
-| `pm whatprovides <file>` |	`dpkg -S` | `dnf provides` |
-| `pm version <pkg>` |	`dpkg-query -W` |	`rpm -q` |
-| `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add` |
-| `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
-|---|---|---|
+| pm update |	apt-get update | dnf makecache --refresh |
+| pm upgrade |	apt-get upgrade -y | dnf upgrade -y |
+| pm full-upgrade |	apt-get full-upgrade -y | dnf upgrade -y |
+| pm install <pkg…> |	apt-get install -y | dnf install -y |
+| pm reinstall <pkg…> |	apt-get install --reinstall | dnf reinstall |
+| pm remove <pkg…> |	apt-get remove -y | dnf remove -y |
+| pm purge <pkg…> |	apt-get purge -y | dnf remove -y |
+| pm autoremove |	apt-get autoremove -y | dnf autoremove -y |
+| pm clean |	apt-get clean + autoclean | dnf clean all |
+| pm search <query> |	apt-cache search | dnf search |
+| pm show <pkg> |	apt-cache show | dnf info |
+| pm info <pkg> |	псевдоним show |	псевдоним show |
+| pm list installed |	dpkg -l | dnf list installed |
+| pm list upgradable |	apt list --upgradable | dnf check-update|
+| pm list all |	apt-cache pkgnames | dnf list available |
+| pm whatprovides <file> |	dpkg -S | dnf provides |
+| pm version <pkg> |	dpkg-query -W|	rpm -q |
+| pm hold <pkg>    |	apt-mark hold  | dnf versionlock add |
+| pm unhold <pkg>  |	apt-mark unhol | dnf versionlock delete |
+
+
+
+
+
+
+Вот теперь задача ясна, и у неё есть штатный механизм — ты угадала с функциями, а внедряются они через BASH_ENV + export -f. Двойной контур:
+
+ - BASH_ENV — файл, который bash сам подгружает в каждый неинтерактивный скрипт перед выполнением.   Именно его читают чужие #!/bin/sh и #!/bin/bash скрипты.
+ - export -f — экспортирует функции в окружение, чтобы они доехали и во вложенные bash-процессы, запущенные чужим скриптом.
+ 
+## Шаг 1. Файл совместимости
+
+/etc/pm-compat.sh — оверлей для чужих скриптов
+
+```bash
+apt() {
+    case "$1" in
+        update|upgrade|install|remove|autoremove|purge)
+            pm "$@" ;;
+        *) echo "pm-compat: apt $* — не поддерживается, ставь руками" >&2; return 1 ;;
+    esac
+}
+
+apt-get() { apt "$@"; }
+
+export -f apt apt-get
+```
+Функцию с дефисом bash разрешает (apt-get() {} — валидно), так что имя честное, скрипт даже не заметит подмены. Внутри ты можешь не только звать pm, но и просто проверять наличие пакета и делать no-op — раз, как ты говоришь, у тебя всё уже стоит.
+
+Шаг 2. Включить глобально
+Через PAM — это покроет SSH-сессии, логины и cron за один ход:
+
+## Шаг 2. Включить глобально
+Через PAM — это покроет SSH-сессии, логины и cron за один ход:
 
 
