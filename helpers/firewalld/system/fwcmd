@@ -126,6 +126,8 @@ pw_exists() {
     "$fw_exec" --permanent "--get-$1s" 2>/dev/null | grep -qw "$2"
 }
 
+
+
 #-> Telegram bot vars:
 TG_NOTIFY=1
 TG_CONFIG="/etc/awg-bot.conf"
@@ -229,6 +231,34 @@ fwctl_cmd() {
         -h |--help)       ctl_usage ;;
           *) { err "Неизвестный аргумент '$1'"; ctl_usage; exit 2; } ;;
     esac
+}
+
+pw_cmd() {
+    pw_parse
+    pw_kind || die "pw: запускайте симлинк из каталога zones/ или policies/ (сейчас: '$(dirname "$0")')"
+    local d="--zone=$PW_NAME"; [ "$PW_KIND" = policies ] && d="--policy=$PW_NAME"
+    case "$PW_VERB" in
+        new)
+            if pw_exists "${PW_KIND%s}" "$PW_NAME"; then
+                ok "${PW_KIND%s} $PW_NAME уже существует"
+            else
+                pwperm "--new-$PW_KIND=$PW_NAME" || die "не создать $PW_KIND $PW_NAME"
+            fi
+            [ -n "$PW_TARGET" ] && pwperm "$d" --set-target="$PW_TARGET"
+            case "$PW_TARGET" in
+                ACCEPT) pwperm "$d" --set-description="All network connections are accepted." ;;
+                *)      pwperm "$d" --set-description="$PW_NAME" ;;
+            esac
+            pwperm "$d" --set-short="$PW_NAME" ;;
+        del)
+            pw_exists "${PW_KIND%s}" "$PW_NAME" || { ok "${PW_KIND%s} $PW_NAME уже нет"; return 0; }
+            confirm "Удалить $PW_KIND '$PW_NAME'?" "y" || return 0
+            pwperm "--delete-$PW_KIND=$PW_NAME" ;;
+        mod)
+            [ $# -gt 0 ] || die "mod требует аргументов firewalld: mod-$PW_NAME --add-port=8080/tcp"
+            pwperm "$d" "$@" ;;
+    esac
+    input_cmd -- "$fw_exec" --reload
 }
 
 fw_cmd() {
