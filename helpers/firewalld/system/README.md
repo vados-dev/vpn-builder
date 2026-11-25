@@ -2,14 +2,9 @@
 
 <div align="left" style="border-bottom: 1.5px dotted #777;">
 
-### Содержание раздела
-
 <img src="https://img.shields.io/badge/Содержание-раздела-rgb(0%200%200%20%2F%200%25)?style=plastic&logo=github&labelColor=rgb(0%200%200%20%2F%200%25)&logo=https://github.githubassets.com/favicons/favicon.png">
 
-
-
 - [Раздел helpers/firewalld/system](#раздел-helpersfirewalldsystem)
-    - [Содержание раздела](#содержание-раздела)
   - [📋 Описание fwcmd](#-описание-fwcmd)
   - [🚀 Быстрый запуск](#-быстрый-запуск)
   - [🛠 Установка](#-установка)
@@ -54,7 +49,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 
 ## 🛠 Установка
 
-  Сохранить/переименовать в "install-fwcmd.sh" и запустить.
+Сохранить/переименовать в "install-fwcmd.sh" и запустить.
     (После подтверждения, будет установлен со всеми симлинками в /usr/local/bin, а сам установщик будет удалён.)
    или:
     "install-fwcmd.sh 1, если в неинтерактивном режиме, с автоподтверждением (1 — да, 0 — нет).
