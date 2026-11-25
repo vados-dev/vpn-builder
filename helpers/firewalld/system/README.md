@@ -4,11 +4,11 @@
 
 ### Содержание раздела
 1. [Описание fwcmd](#-описание-fwcmd)
-2. [Установка и быстрый запуск]()
-3. [Установка и запуск fwcmd](#-установка)
-4. [Структура файлов](#-структура-файлов)
-5. [Исходные конфигурационные файлы]()
-6. [Тестирование]()
+2. [Быстрый запуск]()
+3. [Установка](#-установка)
+4. [Тестирование]()
+5. [Структура файлов](#-структура-файлов)
+6. [Исходные конфигурационные файлы]()
 7. [Использование]()
 
 
@@ -19,8 +19,7 @@
 ## 📋 Описание fwcmd
 fwcmd - этопомощник с командами firewalld.
 
-
-## 🚀 Установка и быстрый запуск
+## 🚀 Быстрый запуск
 
 Быстрая команда (установка в /usr/local/bin):
 ```bash
@@ -38,45 +37,10 @@ curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh)"
 ```
-
-
 <div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
-## 📂 Структура файлов
-
-```
-/
-├── nginx-root/              # Root filesystem nginx контейнера
-├── certbot-root/            # Root filesystem certbot контейнера
-├── nginx-conf/              # Mount: конфиги nginx
-│   └── default.conf         # Reverse proxy config
-├── nginx-html/              # Mount: статические файлы (если нужно)
-└── certbot-data/            # Mount: сертификаты и credentials
-    ├── cloudflare.ini       # Cloudflare API token (создать вручную!)
-    └── live/                # Let's Encrypt сертификаты
-        └── your-domain.com/
-            ├── fullchain.pem
-            └── privkey.pem
-```
-
-<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
-<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
-
-## 🗂️ Исходные конфигурационные файлы
-
-- Сам скрипт.../usr/local/bin/fwcmd
--инки: 
-
-- fwreload
-- fwctl
-
-
-<div align="left">
-<a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
-<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
-
-## 🛠 Установка:
+## 🛠 Установка
 
   Сохранить/переименовать в "install-fwcmd.sh" и запустить.
     (После подтверждения, будет установлен со всеми симлинками в /usr/local/bin, а сам установщик будет удалён.)
@@ -84,10 +48,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
     "install-fwcmd.sh 1, если в неинтерактивном режиме, с автоподтверждением (1 — да, 0 — нет).
     "install-fwcmd.sh [0|1] ~/bin", если в PATH.
 
-<div align="left">
-<a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
-
 
 ## 🧪 Тестирование
 
@@ -116,9 +78,16 @@ fwreload
 [✨]#: --reload
  √ success
 ```
----
 
-### Использование
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
+
+## Команды
+
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
+
+## Использование
 
 Сам скрипт один, при установке создаёт симлинки на самого себя.
 Имя файла (симлинка), является первым аргументом (командой/функцией) при запуске скрипта. 
@@ -154,6 +123,8 @@ fwreload
 :exclamation:**Синтаксис apt — исполнение честное.
 Скрипт не эмулирует вывод, а вызывает настоящий бэкенд, поэтому возврат кодов и текст оригинальный.**
 
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
 ## Перекати-поле
 
@@ -248,38 +219,38 @@ pw_cmd() {
 ```bash
         new-*|del-*|mod-*)  pw_cmd "$@" ;;
 ```
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
+## 📂 Структура файлов
 
+```
+/
+├── nginx-root/              # Root filesystem nginx контейнера
+├── certbot-root/            # Root filesystem certbot контейнера
+├── nginx-conf/              # Mount: конфиги nginx
+│   └── default.conf         # Reverse proxy config
+├── nginx-html/              # Mount: статические файлы (если нужно)
+└── certbot-data/            # Mount: сертификаты и credentials
+    ├── cloudflare.ini       # Cloudflare API token (создать вручную!)
+    └── live/                # Let's Encrypt сертификаты
+        └── your-domain.com/
+            ├── fullchain.pem
+            └── privkey.pem
+```
 
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
-## Как работает
+## 🗂️ Исходные конфигурационные файлы
 
-### Команды
+- Сам скрипт.../usr/local/bin/fwcmd
+-инки: 
 
-| Команда	| apt	| dnf / yum |
-|---|---|---|
-| `pm update` |	`apt-get update` | `dnf makecache --refresh` |
-| `pm upgrade` |	`apt-get upgrade -y` | `dnf upgrade -y` |
-| `pm full-upgrade` |	`apt-get full-upgrade -y` | `dnf upgrade -y` |
-| `pm install <pkg…>` |	`apt-get install -y` | `dnf install -y` |
-| `pm reinstall <pkg…>` |	`apt-get install --reinstall` | `dnf reinstall` |
-| `pm remove <pkg…>` |	`apt-get remove -y` | `dnf remove -y` |
-| `pm purge <pkg…>` |	`apt-get purge -y` | `dnf remove -y` |
-| `pm autoremove` |	`apt-get autoremove -y` | `dnf autoremove -y` |
-| `pm clean` |	`apt-get clean + autoclean` | `dnf clean all` |
-| `pm search <query>` |	`apt-cache search` | `dnf search` |
-| `pm show <pkg>` |	`apt-cache show` | `dnf info` |
-| `pm info <pkg>` |	псевдоним `show` |	псевдоним `show` |
-| `pm list installed` |	`dpkg -l` | `dnf list installed` |
-| `pm list upgradable` |	`apt list --upgradable` | `dnf check-update`|
-| `pm list all` |	`apt-cache pkgnames` | `dnf list available` |
-| `pm whatprovides <file>` |	`dpkg -S` | `dnf provides` |
-| `pm version <pkg>` |	`dpkg-query -W` |	`rpm -q` |
-| `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add` |
-| `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
->:warning: В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
-
----
+- fwreload
+- fwctl
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
 <div align="center">
 
