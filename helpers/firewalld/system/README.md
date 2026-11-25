@@ -4,8 +4,12 @@
 
 ### Содержание раздела
 1. [Описание fwcmd](#-описание-fwcmd)
-2. [Установка и запуск fwcmd](#-установка)
-3. [Структура файлов]#-структура-файлов)
+2. [Установка и быстрый запуск]()
+3. [Установка и запуск fwcmd](#-установка)
+4. [Структура файлов](#-структура-файлов)
+5. [Исходные конфигурационные файлы]()
+6. [Тестирование]()
+7. [Использование]()
 
 
 
@@ -14,6 +18,30 @@
 
 ## 📋 Описание fwcmd
 fwcmd - этопомощник с командами firewalld.
+
+
+## 🚀 Установка и быстрый запуск
+
+Быстрая команда (установка в /usr/local/bin):
+```bash
+curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
+```
+
+Вариант без root (в ~/bin):
+
+```bash
+curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
+```
+
+### Разовое использование без установки
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh)"
+```
+
+
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
 ## 📂 Структура файлов
 
@@ -32,6 +60,9 @@ fwcmd - этопомощник с командами firewalld.
             └── privkey.pem
 ```
 
+<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
+
 ## 🗂️ Исходные конфигурационные файлы
 
 - Сам скрипт.../usr/local/bin/fwcmd
@@ -39,6 +70,11 @@ fwcmd - этопомощник с командами firewalld.
 
 - fwreload
 - fwctl
+
+
+<div align="left">
+<a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
+<div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
 ## 🛠 Установка:
 
@@ -52,10 +88,6 @@ fwcmd - этопомощник с командами firewalld.
 <a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
-
-
-
----
 
 ## 🧪 Тестирование
 
@@ -86,7 +118,7 @@ fwreload
 ```
 ---
 
-### Использование:
+### Использование
 
 Сам скрипт один, при установке создаёт симлинки на самого себя.
 Имя файла (симлинка), является первым аргументом (командой/функцией) при запуске скрипта. 
@@ -122,25 +154,6 @@ fwreload
 :exclamation:**Синтаксис apt — исполнение честное.
 Скрипт не эмулирует вывод, а вызывает настоящий бэкенд, поэтому возврат кодов и текст оригинальный.**
 
-
-## 🚀 Установка и Запуск fwcmd
-
-Быстрая команда (установка в /usr/local/bin):
-```bash
-curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
-```
-
-Вариант без root (в ~/bin):
-
-```bash
-curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
-```
-
-### Разовое использование без установки
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh)"
-```
 
 ## Перекати-поле
 
