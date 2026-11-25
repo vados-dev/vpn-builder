@@ -129,12 +129,15 @@ export -f apt apt-get
 ```bash
   echo 'BASH_ENV=/etc/pm-compat.sh' >> /etc/environment
 ```
-# /etc/systemd/system.conf.d/pm-compat.conf
-[Manager]
-DefaultEnvironment=BASH_ENV=/etc/pm-compat.sh
 
 Для systemd-сервисов PAM не работает, им отдельно:
 
+```
+  # /etc/systemd/system.conf.d/pm-compat.conf
+[Manager]
+DefaultEnvironment=BASH_ENV=/etc/pm-compat.sh
+```
+и systemctl daemon-reexec (или ребут). После этого чужой скрипт с apt-get install foo просто вызовет твою функцию — ни один файл чужого репозитория трогать не надо.
 Где эта схема честно не работает
 
 - скрипты не на bash. На RHEL-семействе /bin/sh — это bash, так  что #!/bin/sh покрыт. Но если попадётся настоящий dash или скрипт на zsh — функции не доедут.
