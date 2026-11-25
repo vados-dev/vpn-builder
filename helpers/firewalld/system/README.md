@@ -4,7 +4,7 @@
 
 ### Содержание раздела
 1. [Описание fwcmd](#описание-fwcmd)
-2. [Установка и запуск fwcmd](#установка-и-запуск-fwcmd)
+2. [Установка и запуск fwcmd](#-установка)
 
 
 
@@ -134,6 +134,103 @@ curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd)"
 ```
+
+## Перекати-поле
+
+Как это встраивается
+
+Ты создаёшь каталоги-носители:
+
+```text
+/root/.firewalld/
+├── zones/
+│   ├── new-VPN-trusted-ACCEPT -> /usr/local/bin/fwcmd
+│   └── new-FOREIGN-ACCEPT     -> /usr/local/bin/fwcmd
+└── policies/
+    └── new-GW-VPN-to-world    -> /usr/local/bin/fwcmd
+```
+Удаляемое — переименованием: mv new-VPN-trusted-ACCEPT del-VPN-trusted-ACCEPT. Настройки зоны — mod--симлинком с аргументами: zones/mod-VPN --add-port=8080/tcp.
+
+В fwcmd добавляются три вещи.
+
+Блок парсинга (после static vars):
+```bash#-> Перекати-поле: объекты firewalld по имени симлинка.
+#    Грамматика: new|del|mod-<имя>[-TARGET], TARGET: ACCEPT|REJECT|DROP.
+#    Тип объекта задаёт каталог симлинка: zones/ или policies/.
+pw_parse() {
+    local me="${me_name%.sh}"
+    case "$me" in
+        new-*|del-*|mod-*) ;;
+        *) die "pw: '$me_name' не подходит под грамматику new|del|mod-<имя>[-TARGET]" ;;
+    esac
+    PW_VERB="${me%%-*}"; me="${me#*-}"; PW_TARGET=""
+    case "${me##*-}" in
+        ACCEPT|REJECT|DROP) PW_TARGET="${me##*-}"; me="${me%-*}" ;;
+    esac
+    PW_NAME="$me"
+    [ -n "$PW_NAME" ] || die "pw: пустое имя объекта"
+}
+
+pw_kind() {  # каталог симлинка решает, ЧТО это (не разрешая сам симлинк!)
+    local here; here="$(dirname "$0")"; here="$(cd "$here" 2>/dev/null && pwd)" || return 1
+    case "${here##*/}" in
+        zones)    PW_KIND="zones" ;;
+        policies) PW_KIND="policies" ;;
+        *)        return 1 ;;
+    esac
+}
+
+pwperm() {
+    declare -A RESP=([true]="success" [false]="error|fail" [answer]="")
+    input_cmd RESP -- "$fw_exec" --permanent "$@" && return 0
+    local rc=$?; [ "$rc" -eq 2 ] && warn "Ответ firewalld: $OUT"
+    return "$rc"
+}
+
+pw_exists() {  # pw_exists zone|policy <имя>
+    "$fw_exec" --permanent "--get-$1s" 2>/dev/null | grep -qw "$2"
+}
+```
+Движок:
+```bash
+pw_cmd() {
+    pw_parse
+    pw_kind || die "pw: запускайте симлинк из каталога zones/ или policies/ (сейчас: '$(dirname "$0")')"
+
+    local d="--zone=$PW_NAME"; [ "$PW_KIND" = policies ] && d="--policy=$PW_NAME"
+
+    case "$PW_VERB" in
+        new)
+            if pw_exists "${PW_KIND%s}" "$PW_NAME"; then
+                ok "${PW_KIND%s} $PW_NAME уже существует"
+            else
+                pwperm "--new-$PW_KIND=$PW_NAME" || die "не создать $PW_KIND $PW_NAME"
+            fi
+            [ -n "$PW_TARGET" ] && pwperm "$d" --set-target="$PW_TARGET"
+            case "$PW_TARGET" in
+                ACCEPT) pwperm "$d" --set-description="All network connections are accepted." ;;
+                *)      pwperm "$d" --set-description="$PW_NAME" ;;
+            esac
+            pwperm "$d" --set-short="$PW_NAME" ;;
+        del)
+            pw_exists "${PW_KIND%s}" "$PW_NAME" || { ok "${PW_KIND%s} $PW_NAME уже нет"; return 0; }
+            confirm "Удалить $PW_KIND '$PW_NAME'?" "y" || return 0
+            pwperm "--delete-$PW_KIND=$PW_NAME" ;;
+        mod)
+            [ $# -gt 0 ] || die "mod требует аргументов firewalld: mod-$PW_NAME --add-port=8080/tcp"
+            pwperm "$d" "$@" ;;
+    esac
+    input_cmd -- "$fw_exec" --reload
+}
+```
+
+И строку в fw_cmd, до *):
+```bash
+        new-*|del-*|mod-*)  pw_cmd "$@" ;;
+```
+
+
+
 
 ## Как работает
 
