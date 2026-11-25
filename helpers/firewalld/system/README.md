@@ -3,8 +3,9 @@
 <div align="left">
 
 ### Содержание раздела
-1. [Описание fwcmd](#описание-fwcmd)
+1. [Описание fwcmd](#-описание-fwcmd)
 2. [Установка и запуск fwcmd](#-установка)
+3. [Структура файлов]#-структура-файлов)
 
 
 
@@ -48,7 +49,7 @@ fwcmd - этопомощник с командами firewalld.
     "install-fwcmd.sh [0|1] ~/bin", если в PATH.
 
 
-<div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a><div>
+<div align="left" style="border-top: 1px dotted #6c5d53;"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a><div>
 
 ---
 
