@@ -57,30 +57,29 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 
 ## 🧪 Тестирование
 
-:exclamation:`для чистоты тестирования запускать лучше из любого места, чтобы удостовериться, что скрипт и симлинки доступны во всей системе`
+:exclamation:**для чистоты тестирования запускать лучше из любого места, чтобы удостовериться, что скрипт и симлинки доступны во всей системе**
 
-### Проверка версии firewalld
+Проверка версии firewalld
 ```bash
-fwcmd --version
+    fwcmd --version
 ```
-`Должен вернуть номер версии`
-> `пример:`
+Должен вернуть номер версии
+> пример:
 ```example
-# fwcmd --version
-[✨]#: firewall-cmd --version
+    # fwcmd --version
+    [✨]#: firewall-cmd --version
 2.4.3
 ```
-
-### Проверка симлинка fwreload
+Проверка симлинка fwreload
 ```example
-fwreload
+    fwreload
 ```
-`Должен ответить "success"`
-> `пример:`
+Должен ответить "success"
+> пример:
 ```example
-# fwreload
-[✨]#: --reload
- √ success
+    # fwreload
+    [✨]#: --reload
+    √ success
 ```
 
 <div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
