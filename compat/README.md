@@ -105,7 +105,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 
 /etc/pm-compat.sh — оверлей для чужих скриптов
 
-```bash
+```
 apt() {
     case "$1" in
         update|upgrade|install|remove|autoremove|purge)
@@ -117,8 +117,8 @@ apt() {
 apt-get() { apt "$@"; }
 
 export -f apt apt-get
-
 ```
+
 Функцию с дефисом bash разрешает (apt-get() {} — валидно), так что имя честное, скрипт даже не заметит подмены. Внутри ты можешь не только звать pm, но и просто проверять наличие пакета и делать no-op — раз, как ты говоришь, у тебя всё уже стоит.
 
 Шаг 2. Включить глобально
