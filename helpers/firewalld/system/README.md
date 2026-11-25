@@ -48,21 +48,13 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
 
 
-<!-- cspell:ignore Установка -->
 ## 🛠 Установка
 
-Сохраните скрипт под именем `install-fwcmd.sh` и запустите его.
-После подтверждения скрипт будет установлен со всеми симлинками в `/usr/local/bin`, а сам установщик будет удалён.
-
-Для неинтерактивной установки с автоподтверждением:
-
-```bash
-bash install-fwcmd.sh [0|1] ~/bin
-```
-
-- `1` — установить;
-- `0` — не устанавливать;
-- `~/bin` — каталог установки, который должен быть указан в `PATH`.
+Сохранить/переименовать в "install-fwcmd.sh" и запустить.
+    (После подтверждения, будет установлен со всеми симлинками в /usr/local/bin, а сам установщик будет удалён.)
+   или:
+    "install-fwcmd.sh 1, если в неинтерактивном режиме, с автоподтверждением (1 — да, 0 — нет).
+    "install-fwcmd.sh [0|1] ~/bin", если в PATH.
 
 <div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
