@@ -63,11 +63,12 @@ mkdir -p ~/bin \
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh)" pm list installed
 ```
-    Работает, потому что -i и usage() не задействуются, а $0 подменяется на pm.
+Работает, потому что -i и usage() не задействуются, а $0 подменяется на pm.
+Как работает
 
-## Как работает
+#Команды
 
-### Команды
+
 
 | Команда	| apt	| dnf / yum |
 |---|---|---|
@@ -90,9 +91,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/ma
 | `pm version <pkg>` |	`dpkg-query -W` |	`rpm -q` |
 | `pm hold <pkg>` |	`apt-mark hold` | `dnf versionlock add` |
 | `pm unhold <pkg>` |	`apt-mark unhol` | `dnf versionlock delete` |
->:warning: В dnf нет понятия conffiles, поэтому purge полностью эквивалентен remove — так и задумано.
+|---|---|---|
 
 
-
-
-Подключение к чужим скриптамG
