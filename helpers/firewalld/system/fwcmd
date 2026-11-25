@@ -239,6 +239,7 @@ fw_cmd() {
         fwchk)              input_cmd -- "$chk_cmd" "$chk_args" ;;
         fwctl)              fwctl_cmd "$@" ;;
         install-fwcmd.sh)   fwcmd_install "$@" ;;
+        new-*|del-*|mod-*)  pw_cmd "$@" ;;
         *)                  run_cmd "$fw_exec" "$@" ;;
     esac
 }
