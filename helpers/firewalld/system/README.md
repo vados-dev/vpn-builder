@@ -118,22 +118,23 @@ fwreload
 Скрипт не эмулирует вывод, а вызывает настоящий бэкенд, поэтому возврат кодов и текст оригинальный.**
 
 
-## 🚀 Установка и Запуск pm
+## 🚀 Установка и Запуск fwcmd
 
 Быстрая команда (установка в /usr/local/bin):
 ```bash
-curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
+curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
 ```
 
 Вариант без root (в ~/bin):
+
 ```bash
-curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
+curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
 ```
 
 ### Разовое использование без установки
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/fwcmd)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh)"
 ```
 
 ## Перекати-поле
