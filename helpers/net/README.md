@@ -30,19 +30,19 @@ fwcmd - этопомощник с командами firewalld.
 Быстрая команда (установка в /usr/local/bin):
 
 ```bash
-curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
+curl -fsSL -o /tmp/install-fwcmd.sh https://github.com/vados-dev/vpn-builder/raw/refs/heads/master/helpers/net/install-fwcmd.sh && chmod +x /tmp/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh
 ```
 
 Вариант без root (в ~/bin):
 
 ```bash
-curl -fsSL -o /tmp/install-fwcmd.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
+curl -fsSL -o /tmp/install-fwcmd.sh https://github.com/vados-dev/vpn-builder/raw/refs/heads/master/helpers/net/install-fwcmd.sh && sudo bash /tmp/install-fwcmd.sh 1 ~/bin
 ```
 
 Разовое использование без установки:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vados-dev/vpn-builder/master/helpers/firewalld/system/install-fwcmd.sh)"
+bash -c "$(curl -fsSL https://github.com/vados-dev/vpn-builder/raw/refs/heads/master/helpers/net/install-nmcmd.sh)"
 ```
 <div align="left"><a href="#"><img src="https://img.shields.io/badge/%E2%AC%86-up-151b23?style=flat-square&logoColor=white&labelColor=0000FF" /></a>
 <div style="border-top: 1px dotted #6c5d53; opacity: 0.5;"></div></div>
