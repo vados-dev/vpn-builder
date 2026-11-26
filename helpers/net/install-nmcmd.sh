@@ -92,7 +92,7 @@ set -o pipefail
 _c() { [ $# == 0 ] && printf "\e[0m" || printf "$1" | sed 's/\(.\)/\1;/g;s/\([SDIUFNHT]\)/2\1/g;s/\([KRGYBMCW]\)/3\1/g;s/\([krgybmcw]\)/4\1/g;y/SDIUFNHTsdiufnhtKRGYBMCWkrgybmcw/12345789123457890123456701234567/;s/^\(.*\);$/\\e[\1m/g'; }
 [ $# == 0 ] && cecho() { printf "$(_c "$1")%b\033[0m\n" "$2"; }; ok_color() { cecho Gs "$*"; }; err_color() { cecho Rs "$*"; } || cecho() { printf '%b\n' "$2"; }; ok_color() { echo "$*"; }; err_color() { echo "$*"; }
 
-R='\033[38;5;203m'; G='\033[0;32m'; Y='\033[0;33m'; B='\033[1;94m'; M='\033[1;35m'; C='\033[0;36m'; W='\033[1;37m'; D='\033[0;90m'; N='\033[0m'
+R='\033[38;5;203m'; G='\033[0;32m'; Y='\033[0;33m'; B='\033[1;94m'; M='\033[1;35m'; C='\033[0;36m'; W='\033[1;37m'; D='\033[0;53m'; N='\033[0m'
 
 ok()   { echo -e "${G}  √ $*${N}"; }
 err()  { echo -e "${R}  × $*${N}"; }
@@ -111,10 +111,6 @@ success_box() {
   echo -e "  ${W}$*${N}"
   echo -e "${G}${LINE}${N}"
 }
-
-dim "test"
-info "test"
-exit 0
 
 #-> Dynamic vars:
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
