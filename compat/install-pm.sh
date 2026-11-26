@@ -217,5 +217,5 @@ case "$cmd" in
         case "$PKG" in apt) run_cmd apt-get --version; run_cmd apt --version ;; *) run_cmd "$PKG" --version; run_cmd rpm --version ;; esac ;;
 #    -i|--install) pm_install "$@" ;;
     -h|--help|help|"") usage ;;
-    *) { err "Неизвестный аргумент '$1'"; ctl_usage; exit 2; } ;;
+    *) { err "Неизвестный аргумент '$1'"; usage; exit 2; } ;;
 esac
