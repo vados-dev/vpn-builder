@@ -44,18 +44,15 @@ pm — это shell-скрипт, который даёт один и тот ж�
 ## 🚀 Установка и Запуск pm
 Быстрая команда (установка в /usr/local/bin):
 ```bash
-curl -fsSL -o /tmp/install-pm.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh \
-  && sudo bash /tmp/install-pm.sh -i \
-  && rm -f /tmp/install-pm.sh
+    curl -fsSL -o /tmp/install-pm.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh && \
+    sudo bash /tmp/install-pm.sh -i && rm -f /tmp/install-pm.sh
 ```
     Проверка: pm --help и pm list installed | head.
 
 Вариант без root (в ~/bin):
 ```bash
-mkdir -p ~/bin \
-  && curl -fsSL -o /tmp/install-pm.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh \
-  && sudo bash /tmp/install-pm.sh -i ~/bin \
-  && rm -f /tmp/install-pm.sh
+    curl -fsSL -o /tmp/install-pm.sh https://raw.githubusercontent.com/vados-dev/vpn-builder/master/compat/install-pm.sh && \
+    sudo bash /tmp/install-pm.sh -i ~/bin && rm -f /tmp/install-pm.sh
 ```
     Проверка: pm --help и pm list installed | head.
 
