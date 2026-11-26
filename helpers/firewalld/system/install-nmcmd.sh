@@ -38,8 +38,13 @@
 #    Имя файла (симлинка) — первый аргумент (команда) при запуске. Отсюда:
 #    `nmcmd`..........................`nmcli` - Примет любое количество, любых аргументов.
 #                                               Ответ — сырой вывод nmcli.
-#    `nmimport <файл.conf>`...........`nmcli connection import type wireguard file <файл>`
+#    `nmimport <тип> <файл>`.........`nmcli connection import type <тип> file <файл>`.
+#                                       Тип — любой, что умеет NM: wireguard, vpn,
+#                                       ethernet, wifi, ovs, bond... (полный список:
+#                                       "nmcli -f TYPE connection show" или man nm-settings-nmcli).
 #                                       Имя соединения = имя файла без расширения.
+#                                       Пример: nmimport wireguard ~/awg-ams.conf
+#                                               nmimport vpn ~/office.nmconnection-впн
 #    `nmexport <имя>`.................`nmcli connection export <имя>` — в stdout.
 #                                       ВНИМАНИЕ: включает PrivateKey. Перенаправляйте в файл 600.
 #    `nmup <имя>`.....................`nmcli connection up <имя>` — поднять соединение.
@@ -84,20 +89,12 @@
 
 set -o pipefail
 
-# Базовые примитивы: вывод, ввод, журнал, временные файлы, случайные числа,
-# запуск встроенного Python и генерация самостоятельных служебных скриптов.
 _c() { [ $# == 0 ] && printf "\e[0m" || printf "$1" | sed 's/\(.\)/\1;/g;s/\([SDIUFNHT]\)/2\1/g;s/\([KRGYBMCW]\)/3\1/g;s/\([krgybmcw]\)/4\1/g;y/SDIUFNHTsdiufnhtKRGYBMCWkrgybmcw/12345789123457890123456701234567/;s/^\(.*\);$/\\e[\1m/g'; }
-tty >/dev/null 2>&-; && 
-cecho() { printf "$(_c "$1")%b\033[0m\n" "$2"; }; ok_color() { cecho Gs "$*"; }; err_color() { cecho Rs "$*"; } || cecho() { printf '%b\n' "$2"; }; ok_color() { echo "$*"; }; err_color() { echo "$*"; }
+[ $# == 0 ] && cecho() { printf "$(_c "$1")%b\033[0m\n" "$2"; }; ok_color() { cecho Gs "$*"; }; err_color() { cecho Rs "$*"; } || cecho() { printf '%b\n' "$2"; }; ok_color() { echo "$*"; }; err_color() { echo "$*"; }
 
 R='\033[38;5;203m'; G='\033[0;32m'; Y='\033[0;33m'; B='\033[1;94m'; M='\033[1;35m'; C='\033[0;36m'; W='\033[1;37m'; D='\033[0;90m'; N='\033[0m'
 
-# Неинтерактивный режим (--auto, --add-client, вызовы из бота и таймеров):
-# ни один шаг не должен ждать ввода.
-AUTO_MODE=0
-
 ok()   { echo -e "${G}  √ $*${N}"; }
-ok()   { cecho() "${G}  √ $*${N}"; }
 err()  { echo -e "${R}  × $*${N}"; }
 warn() { echo -e "${Y}  ▲ $*${N}"; }
 info() { echo -e "${C}  → $*${N}"; }
@@ -115,8 +112,8 @@ success_box() {
   echo -e "${G}${LINE}${N}"
 }
 
-ok "Неинтерактивный режим (--auto, --add-client, вызовы из бота и таймеров):"
-err "Неинтерактивный режим (--auto, --add-client, вызовы из бота и таймеров):"
+dim "test"
+info "test"
 exit 0
 
 #-> Dynamic vars:
@@ -256,7 +253,7 @@ nm_cmd() {
     [ "$1" = "--version" ] && { echo "${PROGRAM} ${VERSION}"; exit 0; }
     case "${me_name}" in
         nmcmd)             run_cmd "$nm_exec" "$@" ;;
-        nmimport)          [ $# -eq 0 ] && { err "nmimport требует <файл.conf>"; usage; exit 2; }; input_cmd -- "$nm_exec" connection import type wireguard file "$1" ;;
+        nmimport) [ $# -lt 2 ] && { err "nmimport требует <тип> <файл>"; usage; exit 2; }; input_cmd -- "$nm_exec" connection import type "$1" file "$2" ;;
         nmexport)          [ $# -eq 0 ] && { err "nmexport требует <имя-соединения>"; usage; exit 2; }; run_cmd "$nm_exec" connection export "$1" ;;
         nmup)              [ $# -eq 0 ] && { err "nmup требует <имя-соединения>"; usage; exit 2; }; input_cmd -- "$nm_exec" connection up "$1" ;;
         nmdown)            [ $# -eq 0 ] && { err "nmdown требует <имя-соединения>"; usage; exit 2; }; confirm "Опустить соединение '$1'?" "n" && input_cmd -- "$nm_exec" connection down "$1" ;;
